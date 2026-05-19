@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Scale the 100x100 bowl into the 72x72 safe zone (18..90) -->
+    <group
+        android:scaleX="0.72"
+        android:scaleY="0.72"
+        android:translateX="18"
+        android:translateY="18">
+
+        <!-- Bowl body -->
+        <path
+            android:pathData="M20,45 Q20,75 50,85 Q80,75 80,45 L20,45 Z"
+            android:fillColor="#33ffffff"/>
+        <path
+            android:pathData="M20,45 Q20,75 50,85 Q80,75 80,45 L20,45 Z"
+            android:fillColor="#00000000"
+            android:strokeColor="#ffffff"
+            android:strokeWidth="3.5"/>
+
+        <!-- Bowl rim -->
+        <path
+            android:pathData="M20,45 A30,6 0 1,0 80,45 A30,6 0 1,0 20,45"
+            android:fillColor="#66ffffff"
+            android:strokeColor="#ffffff"
+            android:strokeWidth="3"/>
+
+        <!-- Fork -->
+        <group android:alpha="0.75">
+            <path
+                android:pathData="M12,15 L12,28 M15,15 L15,32 M18,15 L18,28"
+                android:fillColor="#00000000"
+                android:strokeColor="#ffffff"
+                android:strokeWidth="2.5"
+                android:strokeLineCap="round"/>
+            <path
+                android:pathData="M15,25 L15,42"
+                android:fillColor="#00000000"
+                android:strokeColor="#ffffff"
+                android:strokeWidth="3"
+                android:strokeLineCap="round"/>
+        </group>
+
+        <!-- Spoon -->
+        <group android:alpha="0.75">
+            <path
+                android:pathData="M85,25 L85,42"
+                android:fillColor="#00000000"
+                android:strokeColor="#ffffff"
+                android:strokeWidth="3"
+                android:strokeLineCap="round"/>
+            <path
+                android:pathData="M80,18 A5,7 0 1,0 90,18 A5,7 0 1,0 80,18"
+                android:fillColor="#99ffffff"
+                android:strokeColor="#ffffff"
+                android:strokeWidth="2.5"/>
+        </group>
+
+        <!-- Food dots -->
+        <path
+            android:pathData="M28,50 A7,7 0 1,0 42,50 A7,7 0 1,0 28,50"
+            android:fillColor="#ccffffff"/>
+        <path
+            android:pathData="M47,48 A8,6 0 1,0 63,48 A8,6 0 1,0 47,48"
+            android:fillColor="#99ffffff"/>
+
+    </group>
+</vector>

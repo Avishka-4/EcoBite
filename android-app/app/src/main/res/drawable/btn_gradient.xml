@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Figma gradient: from-emerald-500 via-teal-500 to-lime-500 -->
+    <gradient
+        android:type="linear"
+        android:angle="0"
+        android:startColor="#10b981"
+        android:centerColor="#14b8a6"
+        android:endColor="#84cc16"/>
+    <corners android:radius="16dp" />
+</shape>

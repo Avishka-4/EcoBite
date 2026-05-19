@@ -1,0 +1,62 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+.npm/
+
+# ── Claude Code ───────────────────────────────────────────────────────────────
+.claude/
+
+# ── Build output ──────────────────────────────────────────────────────────────
+dist/
+build/
+.vite/
+
+# ── Environment & secrets ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+backend/.env
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+venv/
+.venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── OS ────────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE ───────────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+docker-compose.override.yml
+
+# ── ML models (large binary files — store in cloud storage) ──────────────────
+models/*.pt
+models/*.onnx
+models/*.weights
+
+# ── Misc ──────────────────────────────────────────────────────────────────────
+*.tmp
+*.swp
+coverage/
+.coverage

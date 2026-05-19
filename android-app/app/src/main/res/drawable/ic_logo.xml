@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+
+    <!-- Bowl shadow -->
+    <path
+        android:pathData="M15,65 A35,8 0 1,0 85,65 A35,8 0 1,0 15,65"
+        android:fillColor="#33000000"/>
+
+    <!-- Bowl body with gradient -->
+    <path
+        android:pathData="M20,45 Q20,75 50,85 Q80,75 80,45 L20,45 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:type="linear"
+                android:startX="0"
+                android:startY="0"
+                android:endX="0"
+                android:endY="100"
+                android:startColor="#d1fae5"
+                android:endColor="#6ee7b7"/>
+        </aapt:attr>
+    </path>
+    <!-- Bowl body stroke (separate from gradient fill) -->
+    <path
+        android:pathData="M20,45 Q20,75 50,85 Q80,75 80,45 L20,45 Z"
+        android:fillColor="#00000000"
+        android:strokeColor="#059669"
+        android:strokeWidth="2.5"/>
+
+    <!-- Bowl rim ellipse -->
+    <path
+        android:pathData="M20,45 A30,6 0 1,0 80,45 A30,6 0 1,0 20,45"
+        android:fillColor="#dcfce7"
+        android:strokeColor="#059669"
+        android:strokeWidth="2.5"/>
+
+    <!-- Fork (left, 60% opacity) -->
+    <group android:alpha="0.6">
+        <path
+            android:pathData="M12,15 L12,28 M15,15 L15,32 M18,15 L18,28"
+            android:fillColor="#00000000"
+            android:strokeColor="#059669"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"/>
+        <path
+            android:pathData="M15,25 L15,42"
+            android:fillColor="#00000000"
+            android:strokeColor="#059669"
+            android:strokeWidth="2.5"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <!-- Spoon (right, 60% opacity) -->
+    <group android:alpha="0.6">
+        <path
+            android:pathData="M85,25 L85,42"
+            android:fillColor="#00000000"
+            android:strokeColor="#059669"
+            android:strokeWidth="2.5"
+            android:strokeLineCap="round"/>
+        <path
+            android:pathData="M80,18 A5,7 0 1,0 90,18 A5,7 0 1,0 80,18"
+            android:fillColor="#10b981"
+            android:strokeColor="#059669"
+            android:strokeWidth="2"/>
+    </group>
+
+    <!-- Tomato -->
+    <path
+        android:pathData="M28,50 A7,7 0 1,0 42,50 A7,7 0 1,0 28,50"
+        android:fillColor="#ef4444"
+        android:strokeColor="#dc2626"
+        android:strokeWidth="1.5"/>
+    <path
+        android:pathData="M35,45 L35,48"
+        android:fillColor="#00000000"
+        android:strokeColor="#22c55e"
+        android:strokeWidth="2"
+        android:strokeLineCap="round"/>
+
+    <!-- Lettuce leaf (rotated -15° around its centre) -->
+    <group
+        android:rotation="-15"
+        android:pivotX="55"
+        android:pivotY="48">
+        <path
+            android:pathData="M47,48 A8,6 0 1,0 63,48 A8,6 0 1,0 47,48"
+            android:fillColor="#86efac"
+            android:strokeColor="#22c55e"
+            android:strokeWidth="1.5"/>
+        <path
+            android:pathData="M55,45 Q55,50 55,52"
+            android:fillColor="#00000000"
+            android:strokeColor="#16a34a"
+            android:strokeWidth="1.2"
+            android:strokeLineCap="round"/>
+    </group>
+
+    <!-- Carrot piece (rotated 20° around its centre) -->
+    <group
+        android:rotation="20"
+        android:pivotX="46"
+        android:pivotY="56">
+        <path
+            android:pathData="M45,52 L47,52 Q49,52 49,54 L49,58 Q49,60 47,60 L45,60 Q43,60 43,58 L43,54 Q43,52 45,52 Z"
+            android:fillColor="#fb923c"
+            android:strokeColor="#f97316"
+            android:strokeWidth="1.5"/>
+    </group>
+
+    <!-- Garnish dots -->
+    <path
+        android:pathData="M26,55 A2,2 0 1,0 30,55 A2,2 0 1,0 26,55"
+        android:fillColor="#84cc16"/>
+    <path
+        android:pathData="M60,54 A2,2 0 1,0 64,54 A2,2 0 1,0 60,54"
+        android:fillColor="#84cc16"/>
+    <path
+        android:pathData="M46.5,58 A1.5,1.5 0 1,0 49.5,58 A1.5,1.5 0 1,0 46.5,58"
+        android:fillColor="#22c55e"/>
+
+</vector>
