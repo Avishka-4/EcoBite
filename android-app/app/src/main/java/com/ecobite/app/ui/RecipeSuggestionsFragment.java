@@ -2,6 +2,8 @@ package com.ecobite.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,27 +12,30 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import com.ecobite.app.R;
-import com.ecobite.app.api.ApiClient;
-import com.ecobite.app.api.models.Recipe;
-import com.ecobite.app.api.models.RecipeGenerateRequest;
-import com.ecobite.app.api.models.SaveRecipeBody;
-import com.ecobite.app.api.models.SavedRecipeResponse;
 import com.ecobite.app.adapters.RecipeAdapter;
+import com.ecobite.app.api.ClaudeService;
+import com.ecobite.app.api.models.Recipe;
+import com.ecobite.app.database.AppDatabase;
+import com.ecobite.app.database.SavedRecipeEntity;
 import com.ecobite.app.databinding.FragmentRecipeSuggestionsBinding;
+import com.ecobite.app.utils.AuthManager;
 import com.ecobite.app.utils.Constants;
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter.OnRecipeClickListener {
 
     private FragmentRecipeSuggestionsBinding binding;
     private RecipeAdapter adapter;
     private List<String> lastIngredients;
+    private final ClaudeService claudeService = new ClaudeService();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -73,50 +78,42 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
 
     private void generateRecipes(List<String> ingredients) {
         showLoading(true);
+        AuthManager am = AuthManager.getInstance(requireContext());
 
-        ApiClient.getService(requireContext())
-                .generateRecipes(new RecipeGenerateRequest(ingredients, "Italian", "beginner"))
-                .enqueue(new Callback<List<Recipe>>() {
+        claudeService.generateRecipes(
+                ingredients,
+                am.getPreferredCuisine(),
+                am.getCookingExperience(),
+                new ClaudeService.RecipeCallback() {
                     @Override
-                    public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> resp) {
+                    public void onSuccess(List<Recipe> recipes) {
                         if (binding == null) return;
                         showLoading(false);
-                        if (resp.isSuccessful() && resp.body() != null && !resp.body().isEmpty()) {
-                            adapter.setRecipes(resp.body());
-                            binding.tvSubtitle.setText(resp.body().size() + " recipes generated for you");
-                            showContent();
-                        } else {
-                            showError("Couldn't generate recipes. Try again.");
-                        }
+                        adapter.setRecipes(recipes);
+                        binding.tvSubtitle.setText(recipes.size() + " recipes generated for you");
+                        showContent();
                     }
 
                     @Override
-                    public void onFailure(Call<List<Recipe>> call, Throwable t) {
+                    public void onError(String message) {
                         if (binding == null) return;
                         showLoading(false);
-                        showError("Can't reach server. Check your connection and try again.");
+                        showError(message);
                     }
                 });
     }
 
     private void loadSavedIds() {
-        ApiClient.getService(requireContext())
-                .getSavedRecipes()
-                .enqueue(new Callback<List<SavedRecipeResponse>>() {
-                    @Override
-                    public void onResponse(Call<List<SavedRecipeResponse>> call,
-                                           Response<List<SavedRecipeResponse>> resp) {
-                        if (binding == null) return;
-                        if (resp.isSuccessful() && resp.body() != null) {
-                            java.util.Set<String> ids = new java.util.HashSet<>();
-                            for (SavedRecipeResponse s : resp.body()) ids.add(s.recipe.id);
-                            adapter.setSavedIds(ids);
-                        }
-                    }
-
-                    @Override
-                    public void onFailure(Call<List<SavedRecipeResponse>> call, Throwable t) {}
-                });
+        executor.execute(() -> {
+            Set<String> ids = new HashSet<>();
+            for (SavedRecipeEntity e :
+                    AppDatabase.getInstance(requireContext()).savedRecipeDao().getAll()) {
+                ids.add(e.id);
+            }
+            mainHandler.post(() -> {
+                if (binding != null) adapter.setSavedIds(ids);
+            });
+        });
     }
 
     @Override
@@ -128,29 +125,15 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
 
     @Override
     public void onSaveToggle(Recipe recipe, boolean isSaved) {
-        if (isSaved) {
-            ApiClient.getService(requireContext())
-                    .saveRecipe(new SaveRecipeBody(recipe))
-                    .enqueue(new Callback<SavedRecipeResponse>() {
-                        @Override public void onResponse(Call<SavedRecipeResponse> c, Response<SavedRecipeResponse> r) {}
-                        @Override public void onFailure(Call<SavedRecipeResponse> c, Throwable t) {
-                            if (binding == null) return;
-                            adapter.toggleSaved(recipe.id);
-                            Toast.makeText(requireContext(), "Failed to save", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        } else {
-            ApiClient.getService(requireContext())
-                    .unsaveRecipe(recipe.id)
-                    .enqueue(new Callback<Void>() {
-                        @Override public void onResponse(Call<Void> c, Response<Void> r) {}
-                        @Override public void onFailure(Call<Void> c, Throwable t) {
-                            if (binding == null) return;
-                            adapter.toggleSaved(recipe.id);
-                            Toast.makeText(requireContext(), "Failed to unsave", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        }
+        executor.execute(() -> {
+            if (isSaved) {
+                AppDatabase.getInstance(requireContext()).savedRecipeDao()
+                        .insert(SavedRecipeEntity.fromRecipe(recipe));
+            } else {
+                AppDatabase.getInstance(requireContext()).savedRecipeDao()
+                        .deleteById(recipe.id);
+            }
+        });
     }
 
     private void showLoading(boolean loading) {

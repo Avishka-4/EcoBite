@@ -19,32 +19,32 @@
         <ImageView
             android:layout_width="96dp"
             android:layout_height="96dp"
-            android:layout_marginTop="56dp"
+            android:layout_marginTop="72dp"
             android:src="@drawable/ic_logo"
             android:contentDescription="@string/app_name"
-            android:scaleType="fitCenter"/>
+            android:scaleType="fitCenter" />
 
         <!-- App name -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="EcoBite"
-            android:textSize="32sp"
+            android:textSize="34sp"
             android:textStyle="bold"
             android:textColor="@color/colorPrimaryDark"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp" />
 
         <!-- Tagline -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Sign in to your account"
+            android:text="Turn your ingredients into recipes"
             android:textSize="14sp"
             android:textColor="@color/colorTextSecondary"
-            android:layout_marginTop="4dp"
-            android:layout_marginBottom="28dp"/>
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="40dp" />
 
-        <!-- Auth card -->
+        <!-- Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -61,11 +61,20 @@
                 android:paddingTop="28dp"
                 android:paddingBottom="24dp">
 
-                <!-- Email field -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="What's your name?"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/colorText"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Name field -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Email address"
+                    android:hint="Your name"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     app:boxCornerRadiusTopStart="14dp"
                     app:boxCornerRadiusTopEnd="14dp"
@@ -74,60 +83,24 @@
                     app:boxBackgroundColor="@color/colorEmSurface"
                     app:boxStrokeColor="@color/colorChipBg"
                     app:hintTextColor="@color/colorTextSecondary"
-                    android:layout_marginBottom="16dp">
-
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etEmail"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="textEmailAddress"
-                        android:imeOptions="actionNext"
-                        android:textColor="@color/colorText"
-                        android:textSize="14sp"/>
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Password field -->
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Password"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:boxCornerRadiusTopStart="14dp"
-                    app:boxCornerRadiusTopEnd="14dp"
-                    app:boxCornerRadiusBottomStart="14dp"
-                    app:boxCornerRadiusBottomEnd="14dp"
-                    app:boxBackgroundColor="@color/colorEmSurface"
-                    app:boxStrokeColor="@color/colorChipBg"
-                    app:hintTextColor="@color/colorTextSecondary"
-                    app:endIconMode="password_toggle"
                     android:layout_marginBottom="24dp">
 
                     <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/etPassword"
+                        android:id="@+id/etName"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:inputType="textPassword"
+                        android:inputType="textPersonName"
                         android:imeOptions="actionDone"
                         android:textColor="@color/colorText"
-                        android:textSize="14sp"/>
+                        android:textSize="14sp" />
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- Loading indicator -->
-                <ProgressBar
-                    android:id="@+id/progressBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/colorPrimary"
-                    android:visibility="gone"
-                    android:layout_marginBottom="8dp"/>
-
-                <!-- Sign in button with gradient -->
+                <!-- Get Started button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnLogin"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Sign In"
+                    android:text="Get Started"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="@color/white"
@@ -135,19 +108,7 @@
                     android:paddingBottom="16dp"
                     app:backgroundTint="@null"
                     android:background="@drawable/btn_gradient"
-                    app:cornerRadius="16dp"/>
-
-                <!-- Register link -->
-                <TextView
-                    android:id="@+id/tvGoRegister"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_marginTop="18dp"
-                    android:text="Don't have an account? Sign up"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold"
-                    android:textSize="14sp"/>
+                    app:cornerRadius="16dp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>

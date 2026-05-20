@@ -2,6 +2,8 @@ package com.ecobite.app.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,23 +13,26 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.ecobite.app.adapters.RecipeAdapter;
-import com.ecobite.app.api.ApiClient;
 import com.ecobite.app.api.models.Recipe;
-import com.ecobite.app.api.models.SavedRecipeResponse;
+import com.ecobite.app.database.AppDatabase;
+import com.ecobite.app.database.SavedRecipeEntity;
 import com.ecobite.app.databinding.FragmentSavedRecipesBinding;
 import com.ecobite.app.utils.Constants;
 import com.google.gson.Gson;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class SavedRecipesFragment extends Fragment implements RecipeAdapter.OnRecipeClickListener {
 
     private FragmentSavedRecipesBinding binding;
     private RecipeAdapter adapter;
     private final List<Recipe> savedRecipes = new ArrayList<>();
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
     @Nullable
     @Override
@@ -56,36 +61,34 @@ public class SavedRecipesFragment extends Fragment implements RecipeAdapter.OnRe
     }
 
     private void loadSaved() {
+        if (binding == null) return;
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        ApiClient.getService(requireContext())
-                .getSavedRecipes()
-                .enqueue(new Callback<List<SavedRecipeResponse>>() {
-                    @Override
-                    public void onResponse(Call<List<SavedRecipeResponse>> call,
-                                           Response<List<SavedRecipeResponse>> resp) {
-                        binding.progressBar.setVisibility(View.GONE);
-                        binding.swipeRefresh.setRefreshing(false);
-                        if (resp.isSuccessful() && resp.body() != null) {
-                            savedRecipes.clear();
-                            for (SavedRecipeResponse s : resp.body()) savedRecipes.add(s.recipe);
-                            adapter.setRecipes(savedRecipes);
-                            java.util.Set<String> ids = new java.util.HashSet<>();
-                            for (Recipe r : savedRecipes) ids.add(r.id);
-                            adapter.setSavedIds(ids);
-                            binding.tvCount.setText(savedRecipes.size() + " saved " +
-                                    (savedRecipes.size() == 1 ? "recipe" : "recipes"));
-                            binding.tvEmpty.setVisibility(savedRecipes.isEmpty() ? View.VISIBLE : View.GONE);
-                        }
-                    }
+        executor.execute(() -> {
+            List<SavedRecipeEntity> entities =
+                    AppDatabase.getInstance(requireContext()).savedRecipeDao().getAll();
 
-                    @Override
-                    public void onFailure(Call<List<SavedRecipeResponse>> call, Throwable t) {
-                        binding.progressBar.setVisibility(View.GONE);
-                        binding.swipeRefresh.setRefreshing(false);
-                        Toast.makeText(requireContext(), "Failed to load saved recipes", Toast.LENGTH_SHORT).show();
-                    }
-                });
+            List<Recipe> recipes = new ArrayList<>();
+            for (SavedRecipeEntity e : entities) recipes.add(e.toRecipe());
+
+            mainHandler.post(() -> {
+                if (binding == null) return;
+                binding.progressBar.setVisibility(View.GONE);
+                binding.swipeRefresh.setRefreshing(false);
+
+                savedRecipes.clear();
+                savedRecipes.addAll(recipes);
+                adapter.setRecipes(savedRecipes);
+
+                Set<String> ids = new HashSet<>();
+                for (Recipe r : savedRecipes) ids.add(r.id);
+                adapter.setSavedIds(ids);
+
+                binding.tvCount.setText(savedRecipes.size() + " saved "
+                        + (savedRecipes.size() == 1 ? "recipe" : "recipes"));
+                binding.tvEmpty.setVisibility(savedRecipes.isEmpty() ? View.VISIBLE : View.GONE);
+            });
+        });
     }
 
     @Override
@@ -97,24 +100,17 @@ public class SavedRecipesFragment extends Fragment implements RecipeAdapter.OnRe
 
     @Override
     public void onSaveToggle(Recipe recipe, boolean isSaved) {
-        // In the saved list, toggling always means unsave
-        ApiClient.getService(requireContext())
-                .unsaveRecipe(recipe.id)
-                .enqueue(new Callback<Void>() {
-                    @Override
-                    public void onResponse(Call<Void> call, Response<Void> resp) {
-                        savedRecipes.removeIf(r -> r.id.equals(recipe.id));
-                        adapter.setRecipes(savedRecipes);
-                        binding.tvEmpty.setVisibility(savedRecipes.isEmpty() ? View.VISIBLE : View.GONE);
-                        binding.tvCount.setText(savedRecipes.size() + " saved recipes");
-                    }
-
-                    @Override
-                    public void onFailure(Call<Void> call, Throwable t) {
-                        adapter.toggleSaved(recipe.id);
-                        Toast.makeText(requireContext(), "Failed to remove", Toast.LENGTH_SHORT).show();
-                    }
-                });
+        // In saved list, toggling always means unsave
+        executor.execute(() -> {
+            AppDatabase.getInstance(requireContext()).savedRecipeDao().deleteById(recipe.id);
+            mainHandler.post(() -> {
+                if (binding == null) return;
+                savedRecipes.removeIf(r -> r.id.equals(recipe.id));
+                adapter.setRecipes(savedRecipes);
+                binding.tvEmpty.setVisibility(savedRecipes.isEmpty() ? View.VISIBLE : View.GONE);
+                binding.tvCount.setText(savedRecipes.size() + " saved recipes");
+            });
+        });
     }
 
     @Override

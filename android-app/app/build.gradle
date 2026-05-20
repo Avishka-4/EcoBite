@@ -2,6 +2,12 @@ plugins {
     id 'com.android.application'
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { stream -> localProperties.load(stream) }
+}
+
 android {
     namespace 'com.ecobite.app'
     compileSdk 34
@@ -13,6 +19,9 @@ android {
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField "String", "CLAUDE_API_KEY",
+                "\"${localProperties.getProperty('CLAUDE_API_KEY', '')}\""
     }
 
     buildTypes {
@@ -29,6 +38,7 @@ android {
 
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 
@@ -42,7 +52,7 @@ dependencies {
     implementation 'androidx.coordinatorlayout:coordinatorlayout:1.2.0'
     implementation 'androidx.core:core:1.13.1'
 
-    // Navigation Component
+    // Navigation
     implementation 'androidx.navigation:navigation-fragment:2.7.7'
     implementation 'androidx.navigation:navigation-ui:2.7.7'
 
@@ -50,14 +60,18 @@ dependencies {
     implementation 'androidx.lifecycle:lifecycle-viewmodel:2.8.3'
     implementation 'androidx.lifecycle:lifecycle-livedata:2.8.3'
 
-    // Retrofit + OkHttp + Gson
-    implementation 'com.squareup.retrofit2:retrofit:2.11.0'
-    implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
+    // Room (local SQLite database)
+    implementation 'androidx.room:room-runtime:2.6.1'
+    annotationProcessor 'androidx.room:room-compiler:2.6.1'
+
+    // OkHttp (Claude API calls)
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Gson
     implementation 'com.google.code.gson:gson:2.11.0'
 
-    // Glide (image loading)
+    // Glide
     implementation 'com.github.bumptech.glide:glide:4.16.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 
