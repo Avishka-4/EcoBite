@@ -3,6 +3,7 @@ package com.ecobite.app.api;
 import android.content.Context;
 import com.ecobite.app.utils.AuthManager;
 import com.ecobite.app.utils.Constants;
+import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.logging.HttpLoggingInterceptor;
@@ -19,8 +20,10 @@ public class ApiClient {
             logging.setLevel(HttpLoggingInterceptor.Level.BODY);
 
             OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(10, TimeUnit.SECONDS)
+                    .readTimeout(30, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
                     .addInterceptor(chain -> {
-                        // Read the token fresh on every request
                         String token = AuthManager.getInstance(context).getToken();
                         Request original = chain.request();
                         Request.Builder builder = original.newBuilder();

@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import com.ecobite.app.R;
 import com.ecobite.app.api.ApiClient;
 import com.ecobite.app.api.models.Recipe;
 import com.ecobite.app.api.models.RecipeGenerateRequest;
@@ -17,7 +18,6 @@ import com.ecobite.app.api.models.SaveRecipeBody;
 import com.ecobite.app.api.models.SavedRecipeResponse;
 import com.ecobite.app.adapters.RecipeAdapter;
 import com.ecobite.app.databinding.FragmentRecipeSuggestionsBinding;
-import com.ecobite.app.utils.AuthManager;
 import com.ecobite.app.utils.Constants;
 import com.google.gson.Gson;
 import java.util.ArrayList;
@@ -30,6 +30,7 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
 
     private FragmentRecipeSuggestionsBinding binding;
     private RecipeAdapter adapter;
+    private List<String> lastIngredients;
 
     @Nullable
     @Override
@@ -50,45 +51,50 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
         binding.btnBack.setOnClickListener(v ->
                 requireActivity().getOnBackPressedDispatcher().onBackPressed());
 
-        ArrayList<String> ingredients = getArguments() != null
+        binding.btnRetry.setOnClickListener(v -> {
+            if (lastIngredients != null && !lastIngredients.isEmpty()) {
+                loadSavedIds();
+                generateRecipes(lastIngredients);
+            }
+        });
+
+        lastIngredients = getArguments() != null
                 ? getArguments().getStringArrayList("ingredients")
                 : new ArrayList<>();
 
-        if (ingredients == null || ingredients.isEmpty()) {
+        if (lastIngredients == null || lastIngredients.isEmpty()) {
             showError("No ingredients provided.");
             return;
         }
 
-        // Load existing saved IDs so hearts render correctly
         loadSavedIds();
-        generateRecipes(ingredients);
+        generateRecipes(lastIngredients);
     }
 
     private void generateRecipes(List<String> ingredients) {
         showLoading(true);
 
-        // Use profile preferences stored locally
-        String cuisine    = "Italian";   // default — overridden by backend using profile
-        String experience = "beginner";
-
         ApiClient.getService(requireContext())
-                .generateRecipes(new RecipeGenerateRequest(ingredients, cuisine, experience))
+                .generateRecipes(new RecipeGenerateRequest(ingredients, "Italian", "beginner"))
                 .enqueue(new Callback<List<Recipe>>() {
                     @Override
                     public void onResponse(Call<List<Recipe>> call, Response<List<Recipe>> resp) {
+                        if (binding == null) return;
                         showLoading(false);
-                        if (resp.isSuccessful() && resp.body() != null) {
+                        if (resp.isSuccessful() && resp.body() != null && !resp.body().isEmpty()) {
                             adapter.setRecipes(resp.body());
                             binding.tvSubtitle.setText(resp.body().size() + " recipes generated for you");
+                            showContent();
                         } else {
-                            showError("Failed to generate recipes.");
+                            showError("Couldn't generate recipes. Try again.");
                         }
                     }
 
                     @Override
                     public void onFailure(Call<List<Recipe>> call, Throwable t) {
+                        if (binding == null) return;
                         showLoading(false);
-                        showError("Network error: " + t.getMessage());
+                        showError("Can't reach server. Check your connection and try again.");
                     }
                 });
     }
@@ -100,6 +106,7 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
                     @Override
                     public void onResponse(Call<List<SavedRecipeResponse>> call,
                                            Response<List<SavedRecipeResponse>> resp) {
+                        if (binding == null) return;
                         if (resp.isSuccessful() && resp.body() != null) {
                             java.util.Set<String> ids = new java.util.HashSet<>();
                             for (SavedRecipeResponse s : resp.body()) ids.add(s.recipe.id);
@@ -107,7 +114,8 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
                         }
                     }
 
-                    @Override public void onFailure(Call<List<SavedRecipeResponse>> call, Throwable t) {}
+                    @Override
+                    public void onFailure(Call<List<SavedRecipeResponse>> call, Throwable t) {}
                 });
     }
 
@@ -126,7 +134,8 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
                     .enqueue(new Callback<SavedRecipeResponse>() {
                         @Override public void onResponse(Call<SavedRecipeResponse> c, Response<SavedRecipeResponse> r) {}
                         @Override public void onFailure(Call<SavedRecipeResponse> c, Throwable t) {
-                            adapter.toggleSaved(recipe.id); // revert
+                            if (binding == null) return;
+                            adapter.toggleSaved(recipe.id);
                             Toast.makeText(requireContext(), "Failed to save", Toast.LENGTH_SHORT).show();
                         }
                     });
@@ -136,6 +145,7 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
                     .enqueue(new Callback<Void>() {
                         @Override public void onResponse(Call<Void> c, Response<Void> r) {}
                         @Override public void onFailure(Call<Void> c, Throwable t) {
+                            if (binding == null) return;
                             adapter.toggleSaved(recipe.id);
                             Toast.makeText(requireContext(), "Failed to unsave", Toast.LENGTH_SHORT).show();
                         }
@@ -144,15 +154,26 @@ public class RecipeSuggestionsFragment extends Fragment implements RecipeAdapter
     }
 
     private void showLoading(boolean loading) {
-        binding.progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
         binding.layoutLoading.setVisibility(loading ? View.VISIBLE : View.GONE);
-        binding.recyclerRecipes.setVisibility(loading ? View.GONE : View.VISIBLE);
+        binding.progressBar.setVisibility(View.GONE);
+        if (loading) {
+            binding.layoutError.setVisibility(View.GONE);
+            binding.recyclerRecipes.setVisibility(View.GONE);
+        }
+    }
+
+    private void showContent() {
+        binding.layoutLoading.setVisibility(View.GONE);
+        binding.layoutError.setVisibility(View.GONE);
+        binding.recyclerRecipes.setVisibility(View.VISIBLE);
     }
 
     private void showError(String msg) {
-        binding.progressBar.setVisibility(View.GONE);
         binding.layoutLoading.setVisibility(View.GONE);
-        Toast.makeText(requireContext(), msg, Toast.LENGTH_LONG).show();
+        binding.progressBar.setVisibility(View.GONE);
+        binding.recyclerRecipes.setVisibility(View.GONE);
+        binding.tvError.setText(msg);
+        binding.layoutError.setVisibility(View.VISIBLE);
     }
 
     @Override
