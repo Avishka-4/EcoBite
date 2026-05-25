@@ -23,6 +23,7 @@ import com.ecobite.app.R;
 import com.ecobite.app.databinding.FragmentHomeBinding;
 import com.ecobite.app.utils.AuthManager;
 import com.google.android.material.chip.Chip;
+import com.google.gson.Gson;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -135,12 +136,33 @@ public class HomeFragment extends Fragment {
     }
 
     private void addIngredientFromInput() {
-        String val = binding.etIngredient.getText().toString().trim();
-        if (!val.isEmpty()) {
-            ingredients.add(val);
-            binding.etIngredient.setText("");
-            updateChips();
+        String name = binding.etIngredient.getText().toString().trim();
+        if (name.isEmpty()) return;
+
+        String quantity = binding.etQuantity.getText().toString().trim();
+        String condition = getSelectedCondition();
+
+        StringBuilder formatted = new StringBuilder();
+        if (!quantity.isEmpty()) formatted.append(quantity).append(" ");
+        formatted.append(name);
+        if (condition != null) formatted.append(" (").append(condition).append(")");
+
+        ingredients.add(formatted.toString());
+
+        binding.etIngredient.setText("");
+        binding.etQuantity.setText("");
+        binding.chipGroupCondition.clearCheck();
+        updateChips();
+    }
+
+    private String getSelectedCondition() {
+        for (int i = 0; i < binding.chipGroupCondition.getChildCount(); i++) {
+            View child = binding.chipGroupCondition.getChildAt(i);
+            if (child instanceof Chip && ((Chip) child).isChecked()) {
+                return ((Chip) child).getText().toString();
+            }
         }
+        return null;
     }
 
     private void updateChips() {
@@ -164,7 +186,7 @@ public class HomeFragment extends Fragment {
     private void navigateToRecipes() {
         if (ingredients.isEmpty()) return;
         Bundle args = new Bundle();
-        args.putStringArrayList("ingredients", new ArrayList<>(ingredients));
+        args.putString("ingredients", new Gson().toJson(ingredients));
         Navigation.findNavController(requireView())
                   .navigate(R.id.action_home_to_suggestions, args);
     }

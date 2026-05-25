@@ -1,14 +1,15 @@
 package com.ecobite.app.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.bumptech.glide.Glide;
 import com.ecobite.app.R;
 import com.ecobite.app.api.models.Recipe;
 import java.util.ArrayList;
@@ -22,6 +23,14 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         void onRecipeClick(Recipe recipe);
         void onSaveToggle(Recipe recipe, boolean isSaved);
     }
+
+    private static final int[] HEADER_COLORS = {
+        Color.parseColor("#10b981"),
+        Color.parseColor("#0891b2"),
+        Color.parseColor("#f59e0b"),
+        Color.parseColor("#8b5cf6"),
+        Color.parseColor("#ef4444"),
+    };
 
     private final List<Recipe> recipes = new ArrayList<>();
     private final Set<String>  savedIds = new HashSet<>();
@@ -63,27 +72,24 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
         Recipe recipe = recipes.get(position);
         boolean isSaved = savedIds.contains(recipe.id);
 
+        h.headerBand.setBackgroundColor(HEADER_COLORS[position % HEADER_COLORS.length]);
+        h.tvEmoji.setText(emojiFor(recipe.name));
         h.tvName.setText(recipe.name);
         h.tvDesc.setText(recipe.description);
         h.tvTime.setText(recipe.cookTime);
+        h.tvServings.setText(recipe.servings + " servings");
         h.tvDifficulty.setText(recipe.difficulty);
         h.btnSave.setImageResource(isSaved
                 ? R.drawable.ic_heart_filled
                 : R.drawable.ic_heart_outline);
 
-        // Missing ingredients badge
         if (recipe.missingIngredients != null && !recipe.missingIngredients.isEmpty()) {
-            h.tvMissing.setVisibility(View.VISIBLE);
-            h.tvMissing.setText("Need " + recipe.missingIngredients.size() + " more item(s)");
+            h.layoutMissing.setVisibility(View.VISIBLE);
+            h.tvMissing.setText("Need " + recipe.missingIngredients.size()
+                    + " more item(s): " + String.join(", ", recipe.missingIngredients));
         } else {
-            h.tvMissing.setVisibility(View.GONE);
+            h.layoutMissing.setVisibility(View.GONE);
         }
-
-        Glide.with(context)
-             .load(recipe.imageUrl)
-             .centerCrop()
-             .placeholder(R.drawable.placeholder_food)
-             .into(h.ivImage);
 
         h.itemView.setOnClickListener(v -> listener.onRecipeClick(recipe));
         h.btnSave.setOnClickListener(v -> {
@@ -95,19 +101,38 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.ViewHolder
     @Override
     public int getItemCount() { return recipes.size(); }
 
+    private static String emojiFor(String name) {
+        if (name == null) return "🫕";
+        String lower = name.toLowerCase();
+        if (lower.contains("stir") || lower.contains("fry"))  return "🥘";
+        if (lower.contains("soup"))                            return "🍲";
+        if (lower.contains("scramble") || lower.contains("egg")) return "🍳";
+        if (lower.contains("roast") || lower.contains("bake")) return "🔥";
+        if (lower.contains("pasta") || lower.contains("noodle")) return "🍝";
+        if (lower.contains("salad"))                           return "🥗";
+        if (lower.contains("sandwich") || lower.contains("wrap")) return "🥙";
+        if (lower.contains("curry"))                           return "🍛";
+        return "🫕";
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
-        ImageView ivImage, btnSave;
-        TextView  tvName, tvDesc, tvTime, tvDifficulty, tvMissing;
+        View        headerBand;
+        ImageButton btnSave;
+        TextView    tvEmoji, tvName, tvDesc, tvTime, tvServings, tvDifficulty, tvMissing;
+        LinearLayout layoutMissing;
 
         ViewHolder(View v) {
             super(v);
-            ivImage      = v.findViewById(R.id.ivRecipeImage);
-            tvName       = v.findViewById(R.id.tvRecipeName);
-            tvDesc       = v.findViewById(R.id.tvRecipeDesc);
-            tvTime       = v.findViewById(R.id.tvCookTime);
-            tvDifficulty = v.findViewById(R.id.tvDifficulty);
-            tvMissing    = v.findViewById(R.id.tvMissing);
-            btnSave      = v.findViewById(R.id.btnSave);
+            headerBand    = v.findViewById(R.id.headerBand);
+            tvEmoji       = v.findViewById(R.id.tvEmoji);
+            btnSave       = v.findViewById(R.id.btnSave);
+            tvName        = v.findViewById(R.id.tvRecipeName);
+            tvDesc        = v.findViewById(R.id.tvRecipeDesc);
+            tvTime        = v.findViewById(R.id.tvCookTime);
+            tvServings    = v.findViewById(R.id.tvServings);
+            tvDifficulty  = v.findViewById(R.id.tvDifficulty);
+            layoutMissing = v.findViewById(R.id.layoutMissing);
+            tvMissing     = v.findViewById(R.id.tvMissing);
         }
     }
 }
