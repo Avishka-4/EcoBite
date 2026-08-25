@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Clock, Users, ChefHat, ShoppingCart, Sparkles, Heart, AlertCircle } from 'lucide-react';
+import { Clock, Users, ChefHat, ShoppingCart, Sparkles, Heart, AlertCircle, ArrowLeft, RefreshCw } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { recipesApi, Recipe } from '../../api/recipes';
 import { ImageWithFallback } from './figma/ImageWithFallback';
@@ -11,8 +11,61 @@ interface RecipeSuggestionsProps {
   onBack: () => void;
 }
 
+const CUISINES = [
+  { name: 'Sri Lankan', emoji: '🇱🇰' },
+  { name: 'Indian', emoji: '🇮🇳' },
+  { name: 'Italian', emoji: '🇮🇹' },
+  { name: 'Korean', emoji: '🇰🇷' },
+  { name: 'Chinese', emoji: '🇨🇳' },
+  { name: 'Malaysian', emoji: '🇲🇾' },
+  { name: 'American', emoji: '🇺🇸' },
+  { name: 'English', emoji: '🇬🇧' },
+];
+
+// Fallback emergency recipes if backend offline
+const FALLBACK_RECIPES: Record<string, Recipe[]> = {
+  'Sri Lankan': [
+    {
+      id: 'sl-1',
+      name: 'Authentic Sri Lankan Dhal Curry (Parippu)',
+      description: 'Creamy red lentil curry with coconut milk, tempered with mustard seeds and curry leaves.',
+      cookTime: '25 mins',
+      servings: 4,
+      difficulty: 'Easy',
+      ingredients: ['red lentils', 'coconut milk', 'turmeric powder', 'curry leaves', 'onions', 'green chillies', 'mustard seeds', 'garlic'],
+      missingIngredients: ['mustard seeds', 'curry leaves'],
+      instructions: [
+        'Rinse red lentils until water runs clear.',
+        'In a pan, cook lentils with sliced onions, garlic, turmeric, and 1 cup of water for 12 minutes.',
+        'Stir in thick coconut milk and simmer for 5 minutes until creamy.',
+        'In a separate small pan, heat 1 tsp oil and temper mustard seeds, curry leaves, and dried chillies.',
+        'Pour tempering over the dhal, mix well, and serve hot with rice or roti.'
+      ],
+      imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800'
+    },
+    {
+      id: 'sl-2',
+      name: 'Sri Lankan Chicken Curry (Kukul Mas)',
+      description: 'Rich, aromatic roasted curry powder chicken simmered in coconut gravy.',
+      cookTime: '35 mins',
+      servings: 4,
+      difficulty: 'Medium',
+      ingredients: ['chicken', 'curry powder', 'coconut milk', 'onions', 'garlic', 'ginger', 'curry leaves', 'cinnamon'],
+      missingIngredients: ['curry powder', 'cinnamon'],
+      instructions: [
+        'Marinate chicken pieces with roasted curry powder, chili powder, and salt.',
+        'Sauté onions, garlic, ginger, and curry leaves in oil until fragrant.',
+        'Add marinated chicken and sear on high heat for 6 minutes.',
+        'Pour in coconut milk, cover, and simmer for 20 minutes until chicken is tender and sauce thickens.'
+      ],
+      imageUrl: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800'
+    }
+  ]
+};
+
 export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProps) {
   const { user } = useAuth();
+  const [selectedCuisine, setSelectedCuisine] = useState(user?.preferred_cuisine || 'Sri Lankan');
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
@@ -20,23 +73,29 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
 
-  const loadRecipes = useCallback(async () => {
+  const loadRecipes = useCallback(async (cuisineToUse?: string) => {
     setLoading(true);
     setError('');
+    const targetCuisine = cuisineToUse || selectedCuisine;
     try {
       const data = await recipesApi.generate({
         ingredients,
-        cuisine: user?.preferred_cuisine ?? undefined,
+        cuisine: targetCuisine,
         experience_level: user?.cooking_experience ?? 'beginner',
-        count: 3,
+        count: 4,
       });
-      setRecipes(data);
+      if (data && data.length > 0) {
+        setRecipes(data);
+      } else {
+        // Fallback
+        setRecipes(FALLBACK_RECIPES[targetCuisine] || FALLBACK_RECIPES['Sri Lankan']);
+      }
     } catch {
-      setError('Failed to generate recipes. Please try again.');
+      setRecipes(FALLBACK_RECIPES[targetCuisine] || FALLBACK_RECIPES['Sri Lankan']);
     } finally {
       setLoading(false);
     }
-  }, [ingredients, user]);
+  }, [ingredients, selectedCuisine, user]);
 
   const loadSaved = useCallback(async () => {
     try {
@@ -48,9 +107,16 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
   }, []);
 
   useEffect(() => {
-    loadRecipes();
+    loadRecipes(selectedCuisine);
     loadSaved();
-  }, [loadRecipes, loadSaved]);
+  }, [selectedCuisine]); // Re-fetch whenever selected cuisine changes
+
+  const handleCuisineSelect = (cName: string) => {
+    if (cName !== selectedCuisine) {
+      setSelectedCuisine(cName);
+      loadRecipes(cName);
+    }
+  };
 
   const toggleSave = async (recipe: Recipe) => {
     setSavingId(recipe.id);
@@ -63,7 +129,13 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
         setSavedIds((prev) => new Set(prev).add(recipe.id));
       }
     } catch {
-      // silent fail
+      // Toggle locally
+      setSavedIds((prev) => {
+        const s = new Set(prev);
+        if (s.has(recipe.id)) s.delete(recipe.id);
+        else s.add(recipe.id);
+        return s;
+      });
     } finally {
       setSavingId(null);
     }
@@ -79,7 +151,7 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
               <div className="w-32 h-32 bg-gradient-to-r from-emerald-400 via-teal-400 to-lime-400 rounded-full blur-3xl opacity-40 animate-pulse" />
             </div>
             <div className="relative">
-              <svg viewBox="0 0 120 120" className="w-32 h-32 mx-auto">
+              <svg viewBox="0 0 120 120" className="w-28 h-28 mx-auto">
                 <circle cx="40" cy="20" r="3" fill="#10b981" opacity="0.6" className="animate-ping" style={{ animationDelay: '0s' }} />
                 <circle cx="60" cy="15" r="4" fill="#14b8a6" opacity="0.6" className="animate-ping" style={{ animationDelay: '0.3s' }} />
                 <circle cx="80" cy="20" r="3" fill="#84cc16" opacity="0.6" className="animate-ping" style={{ animationDelay: '0.6s' }} />
@@ -105,16 +177,11 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
           <div className="bg-white/90 backdrop-blur-md rounded-3xl p-6 shadow-2xl border-2 border-emerald-200">
             <div className="flex items-center justify-center gap-2 mb-3">
               <ChefHat className="w-6 h-6 text-emerald-600 animate-bounce" />
-              <h3 className="font-bold text-gray-800 text-xl">Cooking up ideas</h3>
-              <span className="flex gap-1">
-                {[0, 0.2, 0.4].map((delay) => (
-                  <span key={delay} className="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-bounce" style={{ animationDelay: `${delay}s` }} />
-                ))}
-              </span>
+              <h3 className="font-bold text-gray-800 text-lg">Finding {selectedCuisine} Recipes</h3>
             </div>
-            <p className="text-gray-600 text-sm mb-4">Claude AI is crafting your personalized recipes</p>
+            <p className="text-gray-600 text-xs mb-4">Matching {ingredients.length} ingredients from Kaggle 64K dataset…</p>
             <div className="space-y-2 text-left">
-              {['Analyzing your ingredients…', 'Matching your cuisine style…', 'Personalizing for your level…'].map((txt, i) => (
+              {['Matching compulsory ingredients…', 'Calculating missing items…', 'Filtering top dishes…'].map((txt, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-gray-500">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-500 animate-pulse" style={{ animationDelay: `${i * 0.3}s` }} />
                   <span>{txt}</span>
@@ -139,7 +206,7 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
             <button onClick={onBack} className="px-4 py-2 rounded-xl border-2 border-emerald-200 text-emerald-700 font-semibold text-sm">
               Go Back
             </button>
-            <button onClick={loadRecipes} className="bg-gradient-to-r from-emerald-500 to-lime-500 text-white px-4 py-2 rounded-xl font-semibold text-sm">
+            <button onClick={() => loadRecipes()} className="bg-gradient-to-r from-emerald-500 to-lime-500 text-white px-4 py-2 rounded-xl font-semibold text-sm">
               Retry
             </button>
           </div>
@@ -156,15 +223,18 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
         <div className="flex-1 overflow-y-auto pb-6">
           <div className="relative">
             <ImageWithFallback src={selectedRecipe.imageUrl} alt={selectedRecipe.name} className="w-full h-56 object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
             <div className="absolute top-4 left-0 right-0 px-6 flex justify-between items-center">
-              <button onClick={() => setSelectedRecipe(null)} className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95">
-                <span className="text-xl">←</span>
+              <button
+                onClick={() => setSelectedRecipe(null)}
+                className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg active:scale-95 text-gray-700"
+              >
+                <ArrowLeft className="w-5 h-5" />
               </button>
               <button
                 onClick={() => toggleSave(selectedRecipe)}
                 disabled={savingId === selectedRecipe.id}
-                className="w-10 h-10 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg active:scale-95"
+                className="w-10 h-10 bg-white/90 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg active:scale-95"
               >
                 <Heart className={`w-5 h-5 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-700'}`} />
               </button>
@@ -172,7 +242,7 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
               <h1 className="text-xl font-bold mb-1">{selectedRecipe.name}</h1>
               <p className="opacity-90 text-xs">{selectedRecipe.description}</p>
-              <div className="flex gap-4 mt-4 text-xs">
+              <div className="flex gap-4 mt-3 text-xs">
                 <div className="flex items-center gap-1"><Clock className="w-4 h-4" /><span>{selectedRecipe.cookTime}</span></div>
                 <div className="flex items-center gap-1"><Users className="w-4 h-4" /><span>{selectedRecipe.servings} servings</span></div>
                 <div className="flex items-center gap-1"><ChefHat className="w-4 h-4" /><span>{selectedRecipe.difficulty}</span></div>
@@ -182,40 +252,50 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
 
           <div className="px-6 mt-4">
             {selectedRecipe.missingIngredients.length > 0 && (
-              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-5">
-                <div className="flex items-center gap-2 mb-3">
-                  <ShoppingCart className="w-5 h-5 text-amber-600" />
-                  <h3 className="font-semibold text-amber-900 text-sm">You'll need to buy:</h3>
+              <div className="bg-amber-50 border-2 border-amber-200 rounded-2xl p-4 mb-5 shadow-sm">
+                <div className="flex items-center gap-2 mb-2.5">
+                  <ShoppingCart className="w-4 h-4 text-amber-600" />
+                  <h3 className="font-bold text-amber-900 text-xs uppercase tracking-wide">
+                    Missing Ingredients ({selectedRecipe.missingIngredients.length})
+                  </h3>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {selectedRecipe.missingIngredients.map((ing, i) => (
-                    <span key={i} className="bg-amber-100 text-amber-800 px-3 py-1.5 rounded-full font-medium text-xs">{ing}</span>
+                    <span key={i} className="bg-amber-100 text-amber-900 px-3 py-1 rounded-full font-medium text-xs border border-amber-200">
+                      + {ing}
+                    </span>
                   ))}
                 </div>
               </div>
             )}
 
-            <div className="mb-5">
-              <h3 className="text-sm font-semibold mb-3 text-gray-800 uppercase tracking-wide">All Ingredients</h3>
+            <div className="mb-5 bg-white/90 backdrop-blur-sm p-4 rounded-2xl border-2 border-emerald-100 shadow-md">
+              <h3 className="text-xs font-bold mb-3 text-emerald-800 uppercase tracking-wide">All Ingredients</h3>
               <ul className="space-y-2">
-                {selectedRecipe.ingredients.map((ing, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full mt-1.5" />
-                    <span className="text-gray-700 text-sm">{ing}</span>
-                  </li>
-                ))}
+                {selectedRecipe.ingredients.map((ing, i) => {
+                  const hasIt = ingredients.some(userIng => ing.toLowerCase().includes(userIng.toLowerCase()));
+                  return (
+                    <li key={i} className="flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${hasIt ? 'bg-emerald-500' : 'bg-amber-400'}`} />
+                        <span className={`capitalize ${hasIt ? 'font-semibold text-emerald-900' : 'text-gray-600'}`}>{ing}</span>
+                      </div>
+                      {hasIt && <span className="text-[10px] text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full font-bold">✓ Have</span>}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
 
-            <div>
-              <h3 className="text-sm font-semibold mb-3 text-gray-800 uppercase tracking-wide">Instructions</h3>
+            <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl border-2 border-emerald-100 shadow-md">
+              <h3 className="text-xs font-bold mb-3 text-emerald-800 uppercase tracking-wide">Instructions</h3>
               <ol className="space-y-3">
                 {selectedRecipe.instructions.map((step, i) => (
                   <li key={i} className="flex gap-3">
-                    <div className="w-6 h-6 bg-gradient-to-r from-emerald-500 to-lime-500 text-white rounded-full flex items-center justify-center font-semibold flex-shrink-0 text-xs">
+                    <div className="w-5 h-5 bg-gradient-to-r from-emerald-500 to-lime-500 text-white rounded-full flex items-center justify-center font-bold flex-shrink-0 text-[11px] mt-0.5">
                       {i + 1}
                     </div>
-                    <p className="text-gray-700 text-sm pt-0.5">{step}</p>
+                    <p className="text-gray-700 text-xs leading-relaxed">{step}</p>
                   </li>
                 ))}
               </ol>
@@ -229,65 +309,91 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
   // ── Recipe List ─────────────────────────────────────────────────────────────
   return (
     <div className="h-full bg-gradient-to-br from-emerald-50 via-teal-50 to-lime-50 flex flex-col">
-      <div className="flex-shrink-0 px-6 pt-6 pb-4">
-        <div className="relative">
-          <button onClick={onBack} className="absolute left-0 top-0 w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md active:scale-95">
-            <span className="text-lg">←</span>
+      {/* Header */}
+      <div className="flex-shrink-0 px-6 pt-6 pb-2">
+        <div className="flex items-center justify-between mb-3">
+          <button onClick={onBack} className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md active:scale-95 text-gray-700">
+            <ArrowLeft className="w-4 h-4" />
           </button>
           <div className="text-center">
-            <h1 className="text-lg font-bold mb-1 bg-gradient-to-r from-emerald-600 to-lime-600 bg-clip-text text-transparent">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-lime-600 bg-clip-text text-transparent">
               Recipe Suggestions
             </h1>
-            <p className="text-gray-600 text-xs">
-              {recipes.length} {user?.preferred_cuisine} recipes for you
+            <p className="text-gray-500 text-xs">
+              Matching your {ingredients.length} ingredient{ingredients.length > 1 ? 's' : ''}
             </p>
           </div>
+          <button onClick={() => loadRecipes()} className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md active:scale-95 text-emerald-600" title="Refresh">
+            <RefreshCw className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* 8 Cuisines Tabs Bar */}
+        <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none -mx-2 px-2">
+          {CUISINES.map((c) => (
+            <button
+              key={c.name}
+              onClick={() => handleCuisineSelect(c.name)}
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 active:scale-95 ${
+                selectedCuisine === c.name
+                  ? 'bg-gradient-to-r from-emerald-500 to-lime-500 text-white shadow-md'
+                  : 'bg-white/80 text-gray-600 border border-emerald-100 hover:bg-emerald-50'
+              }`}
+            >
+              <span>{c.emoji}</span>
+              <span>{c.name}</span>
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* Recipes Cards Scroll View */}
       <div className="flex-1 overflow-y-auto px-6 pb-6">
         <div className="space-y-4">
           {recipes.map((recipe) => {
             const isSaved = savedIds.has(recipe.id);
             return (
-              <div key={recipe.id} className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden border-2 border-emerald-100">
+              <div key={recipe.id} className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl overflow-hidden border-2 border-emerald-100 transition-all hover:border-emerald-300">
                 <div className="relative">
                   <ImageWithFallback src={recipe.imageUrl} alt={recipe.name} className="w-full h-40 object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleSave(recipe); }}
                     disabled={savingId === recipe.id}
-                    className="absolute top-3 right-3 w-11 h-11 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl active:scale-90 border-2 border-white/50 disabled:opacity-60"
+                    className="absolute top-3 right-3 w-10 h-10 bg-white/95 backdrop-blur-md rounded-full flex items-center justify-center shadow-lg active:scale-90 border border-white/50"
                   >
-                    <Heart className={`w-5 h-5 ${isSaved ? 'fill-red-500 text-red-500 scale-110' : 'text-gray-600'}`} />
+                    <Heart className={`w-4 h-4 ${isSaved ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
                   </button>
+                  <div className="absolute bottom-2.5 left-4 right-4 text-white">
+                    <h3 className="font-bold text-sm drop-shadow">{recipe.name}</h3>
+                  </div>
                 </div>
 
                 <div className="p-4 cursor-pointer active:bg-emerald-50/50" onClick={() => setSelectedRecipe(recipe)}>
-                  <h3 className="font-bold text-gray-800 mb-1">{recipe.name}</h3>
                   <p className="text-gray-600 text-xs mb-3 line-clamp-2">{recipe.description}</p>
-                  <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
-                    <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /><span>{recipe.cookTime}</span></div>
-                    <div className="flex items-center gap-1"><ChefHat className="w-3.5 h-3.5" /><span>{recipe.difficulty}</span></div>
+                  <div className="flex items-center gap-3 text-xs text-gray-500 mb-3 font-medium">
+                    <div className="flex items-center gap-1"><Clock className="w-3.5 h-3.5 text-emerald-600" /><span>{recipe.cookTime}</span></div>
+                    <div className="flex items-center gap-1"><ChefHat className="w-3.5 h-3.5 text-emerald-600" /><span>{recipe.difficulty}</span></div>
+                    <div className="flex items-center gap-1"><Users className="w-3.5 h-3.5 text-emerald-600" /><span>{recipe.servings} servings</span></div>
                   </div>
 
                   {recipe.missingIngredients.length > 0 ? (
-                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-2.5">
+                      <div className="flex items-center gap-1.5 mb-1.5">
                         <ShoppingCart className="w-3.5 h-3.5 text-amber-600" />
-                        <span className="text-xs font-medium text-amber-900">
+                        <span className="text-xs font-bold text-amber-900">
                           Need: {recipe.missingIngredients.length} item{recipe.missingIngredients.length > 1 ? 's' : ''}
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1">
-                        {recipe.missingIngredients.slice(0, 2).map((ing, i) => (
-                          <span key={i} className="bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs">{ing}</span>
+                        {recipe.missingIngredients.slice(0, 3).map((ing, i) => (
+                          <span key={i} className="bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full text-[11px] font-medium">+ {ing}</span>
                         ))}
                       </div>
                     </div>
                   ) : (
                     <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-2.5 text-center">
-                      <span className="text-xs font-medium text-emerald-700">✓ You have all ingredients!</span>
+                      <span className="text-xs font-bold text-emerald-700">✓ You have all ingredients!</span>
                     </div>
                   )}
                 </div>

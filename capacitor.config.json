@@ -1,0 +1,9 @@
+{
+  "appId": "com.ecobite.app",
+  "appName": "EcoBite",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}
