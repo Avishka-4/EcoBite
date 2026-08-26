@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080  # 7 days
     YOLO_MODEL_PATH: str = ""  # leave empty to auto-download yolo11n.pt
+    VOSK_MODEL_PATH: str = ""  # leave empty to auto-download vosk-model-small-en-us-0.15
     MODEL_SERVER_URL: str = "http://localhost:8001"  # PyTorch recipe model server
     CORS_ORIGINS: List[str] = ["*"]
 
