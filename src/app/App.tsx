@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router';
-import { Home, Bookmark, User } from 'lucide-react';
+import { Home, Users, User } from 'lucide-react';
 import { ProfileSetup } from './components/ProfileSetup';
 import { FoodInput } from './components/FoodInput';
 import { RecipeSuggestions } from './components/RecipeSuggestions';
-import { SavedRecipes } from './components/SavedRecipes';
+import { Community } from './components/Community';
 
-type Screen = 'home' | 'saved' | 'profile';
+type Screen = 'home' | 'community' | 'profile';
 
 function useKeyboardOpen(): boolean {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
@@ -79,7 +79,7 @@ function MainApp() {
           </>
         )}
 
-        {screen === 'saved' && <SavedRecipes />}
+        {screen === 'community' && <Community />}
       </div>
 
       {/* Bottom Navigation — Hidden when keyboard is open while typing */}
@@ -92,15 +92,25 @@ function MainApp() {
                   key: 'home' as Screen,
                   Icon: Home,
                   label: 'Home',
-                  onClick: () => {
-                    setScreen('home');
-                    setIngredients([]);
-                  },
+                  activeGradient: 'from-emerald-500 to-lime-500',
+                  onClick: () => { setScreen('home'); setIngredients([]); },
                 },
-                { key: 'saved' as Screen, Icon: Bookmark, label: 'Saved', onClick: () => setScreen('saved') },
-                { key: 'profile' as Screen, Icon: User, label: 'Profile', onClick: () => setScreen('profile') },
+                {
+                  key: 'community' as Screen,
+                  Icon: Users,
+                  label: 'Community',
+                  activeGradient: 'from-emerald-500 to-lime-500',
+                  onClick: () => setScreen('community'),
+                },
+                {
+                  key: 'profile' as Screen,
+                  Icon: User,
+                  label: 'Profile',
+                  activeGradient: 'from-emerald-500 to-lime-500',
+                  onClick: () => setScreen('profile'),
+                },
               ] as const
-            ).map(({ key, Icon, label, onClick }) => (
+            ).map(({ key, Icon, label, activeGradient, onClick }) => (
               <button
                 key={key}
                 onClick={onClick}
@@ -109,11 +119,11 @@ function MainApp() {
                 }`}
               >
                 {screen === key && (
-                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-lime-500 rounded-2xl shadow-lg" />
+                  <div className={`absolute inset-0 bg-gradient-to-r ${activeGradient} rounded-2xl shadow-lg`} />
                 )}
                 <Icon
                   className={`w-6 h-6 mb-0.5 relative z-10 ${
-                    screen === key && (key === 'saved' || key === 'profile') ? 'fill-white' : ''
+                    screen === key && key === 'profile' ? 'fill-white' : ''
                   }`}
                 />
                 <span className="text-xs font-bold relative z-10">{label}</span>

@@ -22,46 +22,6 @@ const CUISINES = [
   { name: 'English', emoji: '🇬🇧' },
 ];
 
-// Fallback emergency recipes if backend offline
-const FALLBACK_RECIPES: Record<string, Recipe[]> = {
-  'Sri Lankan': [
-    {
-      id: 'sl-1',
-      name: 'Authentic Sri Lankan Dhal Curry (Parippu)',
-      description: 'Creamy red lentil curry with coconut milk, tempered with mustard seeds and curry leaves.',
-      cookTime: '25 mins',
-      servings: 4,
-      difficulty: 'Easy',
-      ingredients: ['red lentils', 'coconut milk', 'turmeric powder', 'curry leaves', 'onions', 'green chillies', 'mustard seeds', 'garlic'],
-      missingIngredients: ['mustard seeds', 'curry leaves'],
-      instructions: [
-        'Rinse red lentils until water runs clear.',
-        'In a pan, cook lentils with sliced onions, garlic, turmeric, and 1 cup of water for 12 minutes.',
-        'Stir in thick coconut milk and simmer for 5 minutes until creamy.',
-        'In a separate small pan, heat 1 tsp oil and temper mustard seeds, curry leaves, and dried chillies.',
-        'Pour tempering over the dhal, mix well, and serve hot with rice or roti.'
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800'
-    },
-    {
-      id: 'sl-2',
-      name: 'Sri Lankan Chicken Curry (Kukul Mas)',
-      description: 'Rich, aromatic roasted curry powder chicken simmered in coconut gravy.',
-      cookTime: '35 mins',
-      servings: 4,
-      difficulty: 'Medium',
-      ingredients: ['chicken', 'curry powder', 'coconut milk', 'onions', 'garlic', 'ginger', 'curry leaves', 'cinnamon'],
-      missingIngredients: ['curry powder', 'cinnamon'],
-      instructions: [
-        'Marinate chicken pieces with roasted curry powder, chili powder, and salt.',
-        'Sauté onions, garlic, ginger, and curry leaves in oil until fragrant.',
-        'Add marinated chicken and sear on high heat for 6 minutes.',
-        'Pour in coconut milk, cover, and simmer for 20 minutes until chicken is tender and sauce thickens.'
-      ],
-      imageUrl: 'https://images.unsplash.com/photo-1603894584373-5ac82b2ae398?w=800'
-    }
-  ]
-};
 
 export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProps) {
   const { user } = useAuth();
@@ -87,11 +47,12 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
       if (data && data.length > 0) {
         setRecipes(data);
       } else {
-        // Fallback
-        setRecipes(FALLBACK_RECIPES[targetCuisine] || FALLBACK_RECIPES['Sri Lankan']);
+        setError('No recipes returned. Please try again.');
       }
-    } catch {
-      setRecipes(FALLBACK_RECIPES[targetCuisine] || FALLBACK_RECIPES['Sri Lankan']);
+    } catch (err: unknown) {
+      console.error('Recipe generation error:', err);
+      const message = err instanceof Error ? err.message : 'Failed to generate recipes.';
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -179,9 +140,9 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
               <ChefHat className="w-6 h-6 text-emerald-600 animate-bounce" />
               <h3 className="font-bold text-gray-800 text-lg">Finding {selectedCuisine} Recipes</h3>
             </div>
-            <p className="text-gray-600 text-xs mb-4">Matching {ingredients.length} ingredients from Kaggle 64K dataset…</p>
+            <p className="text-gray-600 text-xs mb-4">Generating recipes with AWS Bedrock AI…</p>
             <div className="space-y-2 text-left">
-              {['Matching compulsory ingredients…', 'Calculating missing items…', 'Filtering top dishes…'].map((txt, i) => (
+              {['Connecting to AWS Bedrock…', 'Matching your ingredients…', 'Generating personalized recipes…'].map((txt, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-gray-500">
                   <Sparkles className="w-3.5 h-3.5 text-emerald-500 animate-pulse" style={{ animationDelay: `${i * 0.3}s` }} />
                   <span>{txt}</span>
@@ -346,6 +307,8 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
           ))}
         </div>
       </div>
+
+
 
       {/* Recipes Cards Scroll View */}
       <div className="flex-1 overflow-y-auto px-6 pb-6">

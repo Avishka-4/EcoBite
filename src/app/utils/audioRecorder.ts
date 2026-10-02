@@ -2,8 +2,8 @@
  * audioRecorder.ts — Records crystal-clear 16kHz 16-bit mono WAV audio
  * using the browser / WebView Web Audio API.
  *
- * Direct WAV encoding guarantees full compatibility with Vosk on the backend
- * without relying on external server-side codecs or FFmpeg.
+ * Direct WAV encoding guarantees full compatibility with AWS Transcribe Streaming
+ * on the backend — the service accepts 16 kHz 16-bit mono PCM directly.
  */
 
 export interface VoiceRecorderSession {

@@ -18,6 +18,7 @@ export interface UserData {
   age?: number;
   cooking_experience?: string;
   preferred_cuisine?: string;
+  profile_photo_url?: string;
 }
 
 export interface AuthResponse {

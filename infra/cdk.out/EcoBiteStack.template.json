@@ -1,0 +1,1917 @@
+{
+ "Description": "EcoBite infrastructure: S3 profile photos, CloudFront CDN, IAM service user",
+ "Resources": {
+  "ProfilePhotosBucket46E0BA90": {
+   "Type": "AWS::S3::Bucket",
+   "Properties": {
+    "BucketEncryption": {
+     "ServerSideEncryptionConfiguration": [
+      {
+       "ServerSideEncryptionByDefault": {
+        "SSEAlgorithm": "AES256"
+       }
+      }
+     ]
+    },
+    "BucketName": "ecobite-uploads",
+    "CorsConfiguration": {
+     "CorsRules": [
+      {
+       "AllowedHeaders": [
+        "*"
+       ],
+       "AllowedMethods": [
+        "GET",
+        "HEAD"
+       ],
+       "AllowedOrigins": [
+        "*"
+       ],
+       "MaxAge": 3000
+      }
+     ]
+    },
+    "LifecycleConfiguration": {
+     "Rules": [
+      {
+       "AbortIncompleteMultipartUpload": {
+        "DaysAfterInitiation": 1
+       },
+       "Id": "expire-old-versions",
+       "NoncurrentVersionExpiration": {
+        "NoncurrentDays": 30
+       },
+       "Status": "Enabled"
+      }
+     ]
+    },
+    "PublicAccessBlockConfiguration": {
+     "BlockPublicAcls": true,
+     "BlockPublicPolicy": false,
+     "IgnorePublicAcls": true,
+     "RestrictPublicBuckets": false
+    },
+    "VersioningConfiguration": {
+     "Status": "Enabled"
+    }
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/ProfilePhotosBucket/Resource"
+   }
+  },
+  "ProfilePhotosBucketPolicyE61C6CCF": {
+   "Type": "AWS::S3::BucketPolicy",
+   "Properties": {
+    "Bucket": {
+     "Ref": "ProfilePhotosBucket46E0BA90"
+    },
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "s3:GetObject",
+       "Condition": {
+        "StringEquals": {
+         "AWS:SourceArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":cloudfront::",
+            {
+             "Ref": "AWS::AccountId"
+            },
+            ":distribution/",
+            {
+             "Ref": "ProfilePhotosDistribution3BCBCDF2"
+            }
+           ]
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ProfilePhotosBucket46E0BA90",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       }
+      },
+      {
+       "Action": "s3:GetObject",
+       "Condition": {
+        "StringEquals": {
+         "AWS:SourceArn": {
+          "Fn::Join": [
+           "",
+           [
+            "arn:",
+            {
+             "Ref": "AWS::Partition"
+            },
+            ":cloudfront:us-east-1:601930231989:distribution/",
+            {
+             "Ref": "ProfilePhotosDistribution3BCBCDF2"
+            }
+           ]
+          ]
+         }
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "cloudfront.amazonaws.com"
+       },
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ProfilePhotosBucket46E0BA90",
+            "Arn"
+           ]
+          },
+          "/*"
+         ]
+        ]
+       },
+       "Sid": "AllowCloudFrontRead"
+      },
+      {
+       "Action": "s3:GetObject",
+       "Effect": "Allow",
+       "Principal": "*",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ProfilePhotosBucket46E0BA90",
+            "Arn"
+           ]
+          },
+          "/profile-photos/*"
+         ]
+        ]
+       },
+       "Sid": "PublicReadProfilePhotos"
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/ProfilePhotosBucket/Policy/Resource"
+   }
+  },
+  "OAC5B452445": {
+   "Type": "AWS::CloudFront::OriginAccessControl",
+   "Properties": {
+    "OriginAccessControlConfig": {
+     "Description": "EcoBite S3 Origin Access Control",
+     "Name": "EcoBiteStackOAC9B62D7B0",
+     "OriginAccessControlOriginType": "s3",
+     "SigningBehavior": "no-override",
+     "SigningProtocol": "sigv4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/OAC/Resource"
+   }
+  },
+  "ProfilePhotosCachePolicyC85B65C9": {
+   "Type": "AWS::CloudFront::CachePolicy",
+   "Properties": {
+    "CachePolicyConfig": {
+     "Comment": "Long-TTL immutable caching for EcoBite profile photos",
+     "DefaultTTL": 31536000,
+     "MaxTTL": 31536000,
+     "MinTTL": 0,
+     "Name": "EcoBite-ProfilePhotos",
+     "ParametersInCacheKeyAndForwardedToOrigin": {
+      "CookiesConfig": {
+       "CookieBehavior": "none"
+      },
+      "EnableAcceptEncodingBrotli": true,
+      "EnableAcceptEncodingGzip": true,
+      "HeadersConfig": {
+       "HeaderBehavior": "none"
+      },
+      "QueryStringsConfig": {
+       "QueryStringBehavior": "none"
+      }
+     }
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/ProfilePhotosCachePolicy/Resource"
+   }
+  },
+  "ProfilePhotosDistribution3BCBCDF2": {
+   "Type": "AWS::CloudFront::Distribution",
+   "Properties": {
+    "DistributionConfig": {
+     "Comment": "EcoBite profile photos CDN",
+     "DefaultCacheBehavior": {
+      "AllowedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "CachePolicyId": {
+       "Ref": "ProfilePhotosCachePolicyC85B65C9"
+      },
+      "CachedMethods": [
+       "GET",
+       "HEAD"
+      ],
+      "Compress": true,
+      "TargetOriginId": "EcoBiteStackProfilePhotosDistributionOrigin129B01D9A",
+      "ViewerProtocolPolicy": "redirect-to-https"
+     },
+     "Enabled": true,
+     "HttpVersion": "http2and3",
+     "IPV6Enabled": true,
+     "Origins": [
+      {
+       "DomainName": {
+        "Fn::GetAtt": [
+         "ProfilePhotosBucket46E0BA90",
+         "RegionalDomainName"
+        ]
+       },
+       "Id": "EcoBiteStackProfilePhotosDistributionOrigin129B01D9A",
+       "OriginAccessControlId": {
+        "Fn::GetAtt": [
+         "OAC5B452445",
+         "Id"
+        ]
+       },
+       "S3OriginConfig": {
+        "OriginAccessIdentity": ""
+       }
+      }
+     ],
+     "PriceClass": "PriceClass_100"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/ProfilePhotosDistribution/Resource"
+   }
+  },
+  "EcoBiteRepo14900D0E": {
+   "Type": "AWS::ECR::Repository",
+   "Properties": {
+    "LifecyclePolicy": {
+     "LifecyclePolicyText": "{\"rules\":[{\"rulePriority\":1,\"description\":\"Keep last 5 images\",\"selection\":{\"tagStatus\":\"any\",\"countType\":\"imageCountMoreThan\",\"countNumber\":5},\"action\":{\"type\":\"expire\"}}]}"
+    },
+    "RepositoryName": "ecobite-backend"
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteRepo/Resource"
+   }
+  },
+  "EcoBiteVpc076C00E1": {
+   "Type": "AWS::EC2::VPC",
+   "Properties": {
+    "CidrBlock": "10.0.0.0/16",
+    "EnableDnsHostnames": true,
+    "EnableDnsSupport": true,
+    "InstanceTenancy": "default",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/Resource"
+   }
+  },
+  "EcoBiteVpcPublicSubnet1SubnetA00AC013": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.0.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet1/Subnet"
+   }
+  },
+  "EcoBiteVpcPublicSubnet1RouteTableD7AD0AC6": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PublicSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet1/RouteTable"
+   }
+  },
+  "EcoBiteVpcPublicSubnet1RouteTableAssociationA15AD189": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPublicSubnet1RouteTableD7AD0AC6"
+    },
+    "SubnetId": {
+     "Ref": "EcoBiteVpcPublicSubnet1SubnetA00AC013"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet1/RouteTableAssociation"
+   }
+  },
+  "EcoBiteVpcPublicSubnet1DefaultRoute9182D588": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "EcoBiteVpcIGW7EC4C47C"
+    },
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPublicSubnet1RouteTableD7AD0AC6"
+    }
+   },
+   "DependsOn": [
+    "EcoBiteVpcVPCGWC1D2EF6E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet1/DefaultRoute"
+   }
+  },
+  "EcoBiteVpcPublicSubnet1EIP75A6719E": {
+   "Type": "AWS::EC2::EIP",
+   "Properties": {
+    "Domain": "vpc",
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PublicSubnet1"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet1/EIP"
+   }
+  },
+  "EcoBiteVpcPublicSubnet1NATGatewayF29A4C10": {
+   "Type": "AWS::EC2::NatGateway",
+   "Properties": {
+    "AllocationId": {
+     "Fn::GetAtt": [
+      "EcoBiteVpcPublicSubnet1EIP75A6719E",
+      "AllocationId"
+     ]
+    },
+    "SubnetId": {
+     "Ref": "EcoBiteVpcPublicSubnet1SubnetA00AC013"
+    },
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PublicSubnet1"
+     }
+    ]
+   },
+   "DependsOn": [
+    "EcoBiteVpcPublicSubnet1DefaultRoute9182D588",
+    "EcoBiteVpcPublicSubnet1RouteTableAssociationA15AD189"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet1/NATGateway"
+   }
+  },
+  "EcoBiteVpcPublicSubnet2Subnet04ED2646": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.1.0/24",
+    "MapPublicIpOnLaunch": true,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Public"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Public"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet2/Subnet"
+   }
+  },
+  "EcoBiteVpcPublicSubnet2RouteTableFF19E5B8": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PublicSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet2/RouteTable"
+   }
+  },
+  "EcoBiteVpcPublicSubnet2RouteTableAssociation952C162F": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPublicSubnet2RouteTableFF19E5B8"
+    },
+    "SubnetId": {
+     "Ref": "EcoBiteVpcPublicSubnet2Subnet04ED2646"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet2/RouteTableAssociation"
+   }
+  },
+  "EcoBiteVpcPublicSubnet2DefaultRouteFC83D505": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "GatewayId": {
+     "Ref": "EcoBiteVpcIGW7EC4C47C"
+    },
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPublicSubnet2RouteTableFF19E5B8"
+    }
+   },
+   "DependsOn": [
+    "EcoBiteVpcVPCGWC1D2EF6E"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PublicSubnet2/DefaultRoute"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet1SubnetD58EDFA3": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1a",
+    "CidrBlock": "10.0.2.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet1/Subnet"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet1RouteTable98F6E277": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PrivateSubnet1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet1/RouteTable"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet1RouteTableAssociationF1E4C185": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPrivateSubnet1RouteTable98F6E277"
+    },
+    "SubnetId": {
+     "Ref": "EcoBiteVpcPrivateSubnet1SubnetD58EDFA3"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet1/RouteTableAssociation"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet1DefaultRoute010AB34E": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "EcoBiteVpcPublicSubnet1NATGatewayF29A4C10"
+    },
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPrivateSubnet1RouteTable98F6E277"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet1/DefaultRoute"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet2Subnet6A0254C4": {
+   "Type": "AWS::EC2::Subnet",
+   "Properties": {
+    "AvailabilityZone": "us-east-1b",
+    "CidrBlock": "10.0.3.0/24",
+    "MapPublicIpOnLaunch": false,
+    "Tags": [
+     {
+      "Key": "aws-cdk:subnet-name",
+      "Value": "Private"
+     },
+     {
+      "Key": "aws-cdk:subnet-type",
+      "Value": "Private"
+     },
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet2/Subnet"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet2RouteTable1FB77B88": {
+   "Type": "AWS::EC2::RouteTable",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc/PrivateSubnet2"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet2/RouteTable"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet2RouteTableAssociation940EADB8": {
+   "Type": "AWS::EC2::SubnetRouteTableAssociation",
+   "Properties": {
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPrivateSubnet2RouteTable1FB77B88"
+    },
+    "SubnetId": {
+     "Ref": "EcoBiteVpcPrivateSubnet2Subnet6A0254C4"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet2/RouteTableAssociation"
+   }
+  },
+  "EcoBiteVpcPrivateSubnet2DefaultRoute709DD419": {
+   "Type": "AWS::EC2::Route",
+   "Properties": {
+    "DestinationCidrBlock": "0.0.0.0/0",
+    "NatGatewayId": {
+     "Ref": "EcoBiteVpcPublicSubnet1NATGatewayF29A4C10"
+    },
+    "RouteTableId": {
+     "Ref": "EcoBiteVpcPrivateSubnet2RouteTable1FB77B88"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/PrivateSubnet2/DefaultRoute"
+   }
+  },
+  "EcoBiteVpcIGW7EC4C47C": {
+   "Type": "AWS::EC2::InternetGateway",
+   "Properties": {
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "EcoBiteStack/EcoBiteVpc"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/IGW"
+   }
+  },
+  "EcoBiteVpcVPCGWC1D2EF6E": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "InternetGatewayId": {
+     "Ref": "EcoBiteVpcIGW7EC4C47C"
+    },
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteVpc/VPCGW"
+   }
+  },
+  "EcoBiteClusterD14C5BD9": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "ecobite",
+    "ClusterSettings": [
+     {
+      "Name": "containerInsights",
+      "Value": "enabled"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteCluster/Resource"
+   }
+  },
+  "EcoBiteAppSecret90D6AB57": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "All environment variables for the EcoBite FastAPI backend",
+    "Name": "EcoBiteAppConfig",
+    "SecretString": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"DATABASE_URL\": \"sqlite+aiosqlite:///./ecobite.db\", \"SECRET_KEY\": \"REPLACE_WITH_SECURE_KEY\", \"ALGORITHM\": \"HS256\", \"ACCESS_TOKEN_EXPIRE_MINUTES\": \"10080\", \"CORS_ORIGINS\": \"[\\\"*\\\"]\", \"AWS_REGION\": \"us-east-1\", \"S3_BUCKET_NAME\": \"",
+       {
+        "Ref": "ProfilePhotosBucket46E0BA90"
+       },
+       "\", \"CLOUDFRONT_DOMAIN\": \"https://",
+       {
+        "Fn::GetAtt": [
+         "ProfilePhotosDistribution3BCBCDF2",
+         "DomainName"
+        ]
+       },
+       "\", \"REKOGNITION_MIN_CONFIDENCE\": \"70.0\", \"TRANSCRIBE_LANGUAGE_CODE\": \"en-US\", \"TRANSCRIBE_VOCABULARY_FILTER\": \"\", \"BEDROCK_MODEL_ID\": \"us.anthropic.claude-haiku-4-5-20251001-v1:0\", \"BEDROCK_REGION\": \"us-east-1\"}"
+      ]
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteAppSecret/Resource"
+   }
+  },
+  "EcoBiteTaskRole91B546EB": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "Description": "EcoBite Fargate task role - S3, Rekognition, Transcribe, Bedrock"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteTaskRole/Resource"
+   }
+  },
+  "EcoBiteTaskRoleDefaultPolicy67CA0AF6": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ProfilePhotosBucket46E0BA90",
+            "Arn"
+           ]
+          },
+          "/profile-photos/*"
+         ]
+        ]
+       },
+       "Sid": "S3ProfilePhotos"
+      },
+      {
+       "Action": [
+        "s3:HeadBucket",
+        "s3:ListBucket"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ProfilePhotosBucket46E0BA90",
+         "Arn"
+        ]
+       },
+       "Sid": "S3HeadBucket"
+      },
+      {
+       "Action": [
+        "rekognition:DetectLabels",
+        "rekognition:ListCollections"
+       ],
+       "Effect": "Allow",
+       "Resource": "*",
+       "Sid": "Rekognition"
+      },
+      {
+       "Action": [
+        "transcribe:StartStreamTranscription",
+        "transcribe:StartStreamTranscriptionWebSocket",
+        "transcribe:ListVocabularies",
+        "transcribe:GetVocabulary",
+        "transcribe:ListVocabularyFilters",
+        "transcribe:GetVocabularyFilter"
+       ],
+       "Effect": "Allow",
+       "Resource": "*",
+       "Sid": "Transcribe"
+      },
+      {
+       "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "bedrock:ListFoundationModels"
+       ],
+       "Effect": "Allow",
+       "Resource": "*",
+       "Sid": "Bedrock"
+      },
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "EcoBiteAppSecret90D6AB57"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "EcoBiteTaskRoleDefaultPolicy67CA0AF6",
+    "Roles": [
+     {
+      "Ref": "EcoBiteTaskRole91B546EB"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteTaskRole/DefaultPolicy/Resource"
+   }
+  },
+  "EcoBiteExecRole50887229": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteExecRole/Resource"
+   }
+  },
+  "EcoBiteExecRoleDefaultPolicy73D0DC99": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "secretsmanager:GetSecretValue",
+        "secretsmanager:DescribeSecret"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "EcoBiteAppSecret90D6AB57"
+       }
+      },
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "EcoBiteRepo14900D0E",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "EcoBiteLogGroupCB9F48EE",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "EcoBiteExecRoleDefaultPolicy73D0DC99",
+    "Roles": [
+     {
+      "Ref": "EcoBiteExecRole50887229"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteExecRole/DefaultPolicy/Resource"
+   }
+  },
+  "EcoBiteLogGroupCB9F48EE": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/ecs/ecobite-backend",
+    "RetentionInDays": 14
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteLogGroup/Resource"
+   }
+  },
+  "EcoBiteTaskDef14671880": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "AWS_REGION",
+        "Value": "us-east-1"
+       },
+       {
+        "Name": "PYTHONUNBUFFERED",
+        "Value": "1"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "curl -f http://127.0.0.1:8000/health || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 60,
+       "Timeout": 5
+      },
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         {
+          "Fn::Select": [
+           4,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "EcoBiteRepo14900D0E",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".dkr.ecr.",
+         {
+          "Fn::Select": [
+           3,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::GetAtt": [
+               "EcoBiteRepo14900D0E",
+               "Arn"
+              ]
+             }
+            ]
+           }
+          ]
+         },
+         ".",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/",
+         {
+          "Ref": "EcoBiteRepo14900D0E"
+         },
+         ":latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "EcoBiteLogGroupCB9F48EE"
+        },
+        "awslogs-stream-prefix": "ecobite",
+        "awslogs-region": "us-east-1"
+       }
+      },
+      "Name": "EcoBiteContainer",
+      "PortMappings": [
+       {
+        "ContainerPort": 8000,
+        "Protocol": "tcp"
+       }
+      ],
+      "Secrets": [
+       {
+        "Name": "DATABASE_URL",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":DATABASE_URL::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "SECRET_KEY",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":SECRET_KEY::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "ALGORITHM",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":ALGORITHM::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "ACCESS_TOKEN_EXPIRE_MINUTES",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":ACCESS_TOKEN_EXPIRE_MINUTES::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "CORS_ORIGINS",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":CORS_ORIGINS::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "S3_BUCKET_NAME",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":S3_BUCKET_NAME::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "CLOUDFRONT_DOMAIN",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":CLOUDFRONT_DOMAIN::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "REKOGNITION_MIN_CONFIDENCE",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":REKOGNITION_MIN_CONFIDENCE::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "TRANSCRIBE_LANGUAGE_CODE",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":TRANSCRIBE_LANGUAGE_CODE::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "TRANSCRIBE_VOCABULARY_FILTER",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":TRANSCRIBE_VOCABULARY_FILTER::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "BEDROCK_MODEL_ID",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":BEDROCK_MODEL_ID::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "BEDROCK_REGION",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":BEDROCK_REGION::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AWS_ACCESS_KEY_ID",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":AWS_ACCESS_KEY_ID::"
+          ]
+         ]
+        }
+       },
+       {
+        "Name": "AWS_SECRET_ACCESS_KEY",
+        "ValueFrom": {
+         "Fn::Join": [
+          "",
+          [
+           {
+            "Ref": "EcoBiteAppSecret90D6AB57"
+           },
+           ":AWS_SECRET_ACCESS_KEY::"
+          ]
+         ]
+        }
+       }
+      ]
+     }
+    ],
+    "Cpu": "512",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "EcoBiteExecRole50887229",
+      "Arn"
+     ]
+    },
+    "Family": "EcoBiteStackEcoBiteTaskDef6867B6DC",
+    "Memory": "1024",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "EcoBiteTaskRole91B546EB",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteTaskDef/Resource"
+   }
+  },
+  "EcoBiteServiceLBDBCB4080": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "EcoBiteServiceLBSecurityGroupE2F8870A",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Ref": "EcoBiteVpcPublicSubnet1SubnetA00AC013"
+     },
+     {
+      "Ref": "EcoBiteVpcPublicSubnet2Subnet04ED2646"
+     }
+    ],
+    "Type": "application"
+   },
+   "DependsOn": [
+    "EcoBiteVpcPublicSubnet1DefaultRoute9182D588",
+    "EcoBiteVpcPublicSubnet1RouteTableAssociationA15AD189",
+    "EcoBiteVpcPublicSubnet2DefaultRouteFC83D505",
+    "EcoBiteVpcPublicSubnet2RouteTableAssociation952C162F"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/LB/Resource"
+   }
+  },
+  "EcoBiteServiceLBSecurityGroupE2F8870A": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB EcoBiteStackEcoBiteServiceLBC8E338AD",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/LB/SecurityGroup/Resource"
+   }
+  },
+  "EcoBiteServiceLBSecurityGrouptoEcoBiteStackEcoBiteServiceSecurityGroup694587FC800025DE544D": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "EcoBiteServiceSecurityGroup6C25A568",
+      "GroupId"
+     ]
+    },
+    "FromPort": 8000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "EcoBiteServiceLBSecurityGroupE2F8870A",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 8000
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/LB/SecurityGroup/to EcoBiteStackEcoBiteServiceSecurityGroup694587FC:8000"
+   }
+  },
+  "EcoBiteServiceLBPublicListener84EAED1F": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "EcoBiteServiceLBPublicListenerECSGroup62417B46"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "EcoBiteServiceLBDBCB4080"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/LB/PublicListener/Resource"
+   }
+  },
+  "EcoBiteServiceLBPublicListenerECSGroup62417B46": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckIntervalSeconds": 30,
+    "HealthCheckPath": "/health",
+    "HealthCheckTimeoutSeconds": 5,
+    "HealthyThresholdCount": 2,
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "UnhealthyThresholdCount": 3,
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "EcoBiteServiceC9C4AE30": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "EcoBiteClusterD14C5BD9"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 120,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "EcoBiteContainer",
+      "ContainerPort": 8000,
+      "TargetGroupArn": {
+       "Ref": "EcoBiteServiceLBPublicListenerECSGroup62417B46"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "EcoBiteServiceSecurityGroup6C25A568",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Ref": "EcoBiteVpcPrivateSubnet1SubnetD58EDFA3"
+       },
+       {
+        "Ref": "EcoBiteVpcPrivateSubnet2Subnet6A0254C4"
+       }
+      ]
+     }
+    },
+    "ServiceName": "ecobite-backend",
+    "TaskDefinition": {
+     "Ref": "EcoBiteTaskDef14671880"
+    }
+   },
+   "DependsOn": [
+    "EcoBiteServiceLBPublicListenerECSGroup62417B46",
+    "EcoBiteServiceLBPublicListener84EAED1F",
+    "EcoBiteTaskRoleDefaultPolicy67CA0AF6",
+    "EcoBiteTaskRole91B546EB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/Service/Service"
+   }
+  },
+  "EcoBiteServiceSecurityGroup6C25A568": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "EcoBiteStack/EcoBiteService/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Ref": "EcoBiteVpc076C00E1"
+    }
+   },
+   "DependsOn": [
+    "EcoBiteTaskRoleDefaultPolicy67CA0AF6",
+    "EcoBiteTaskRole91B546EB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/Service/SecurityGroup/Resource"
+   }
+  },
+  "EcoBiteServiceSecurityGroupfromEcoBiteStackEcoBiteServiceLBSecurityGroup259006A28000ABA8EE4E": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 8000,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "EcoBiteServiceSecurityGroup6C25A568",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "EcoBiteServiceLBSecurityGroupE2F8870A",
+      "GroupId"
+     ]
+    },
+    "ToPort": 8000
+   },
+   "DependsOn": [
+    "EcoBiteTaskRoleDefaultPolicy67CA0AF6",
+    "EcoBiteTaskRole91B546EB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/Service/SecurityGroup/from EcoBiteStackEcoBiteServiceLBSecurityGroup259006A2:8000"
+   }
+  },
+  "EcoBiteServiceTaskCountTarget1C9CCD96": {
+   "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+   "Properties": {
+    "MaxCapacity": 4,
+    "MinCapacity": 1,
+    "ResourceId": {
+     "Fn::Join": [
+      "",
+      [
+       "service/",
+       {
+        "Ref": "EcoBiteClusterD14C5BD9"
+       },
+       "/",
+       {
+        "Fn::GetAtt": [
+         "EcoBiteServiceC9C4AE30",
+         "Name"
+        ]
+       }
+      ]
+     ]
+    },
+    "RoleARN": {
+     "Fn::Join": [
+      "",
+      [
+       "arn:",
+       {
+        "Ref": "AWS::Partition"
+       },
+       ":iam::601930231989:role/aws-service-role/ecs.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_ECSService"
+      ]
+     ]
+    },
+    "ScalableDimension": "ecs:service:DesiredCount",
+    "ServiceNamespace": "ecs"
+   },
+   "DependsOn": [
+    "EcoBiteTaskRoleDefaultPolicy67CA0AF6",
+    "EcoBiteTaskRole91B546EB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/Service/TaskCount/Target/Resource"
+   }
+  },
+  "EcoBiteServiceTaskCountTargetCpuScalingF113EFCB": {
+   "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+   "Properties": {
+    "PolicyName": "EcoBiteStackEcoBiteServiceTaskCountTargetCpuScaling6C322B7E",
+    "PolicyType": "TargetTrackingScaling",
+    "ScalingTargetId": {
+     "Ref": "EcoBiteServiceTaskCountTarget1C9CCD96"
+    },
+    "TargetTrackingScalingPolicyConfiguration": {
+     "PredefinedMetricSpecification": {
+      "PredefinedMetricType": "ECSServiceAverageCPUUtilization"
+     },
+     "ScaleInCooldown": 120,
+     "ScaleOutCooldown": 60,
+     "TargetValue": 70
+    }
+   },
+   "DependsOn": [
+    "EcoBiteTaskRoleDefaultPolicy67CA0AF6",
+    "EcoBiteTaskRole91B546EB"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteService/Service/TaskCount/Target/CpuScaling/Resource"
+   }
+  },
+  "EcoBiteServiceUser62F24BDA": {
+   "Type": "AWS::IAM::User",
+   "Properties": {
+    "UserName": "ecobite-service"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteServiceUser/Resource"
+   }
+  },
+  "EcoBiteServiceUserDefaultPolicyA307CF86": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "s3:PutObject",
+        "s3:GetObject",
+        "s3:DeleteObject"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::Join": [
+         "",
+         [
+          {
+           "Fn::GetAtt": [
+            "ProfilePhotosBucket46E0BA90",
+            "Arn"
+           ]
+          },
+          "/profile-photos/*"
+         ]
+        ]
+       },
+       "Sid": "DevS3"
+      },
+      {
+       "Action": [
+        "s3:HeadBucket",
+        "s3:ListBucket"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ProfilePhotosBucket46E0BA90",
+         "Arn"
+        ]
+       },
+       "Sid": "DevS3Head"
+      },
+      {
+       "Action": [
+        "rekognition:DetectLabels",
+        "rekognition:ListCollections"
+       ],
+       "Effect": "Allow",
+       "Resource": "*",
+       "Sid": "DevRekognition"
+      },
+      {
+       "Action": [
+        "transcribe:StartStreamTranscription",
+        "transcribe:StartStreamTranscriptionWebSocket",
+        "transcribe:ListVocabularies",
+        "transcribe:GetVocabulary",
+        "transcribe:ListVocabularyFilters",
+        "transcribe:GetVocabularyFilter"
+       ],
+       "Effect": "Allow",
+       "Resource": "*",
+       "Sid": "DevTranscribe"
+      },
+      {
+       "Action": [
+        "bedrock:InvokeModel",
+        "bedrock:InvokeModelWithResponseStream",
+        "bedrock:ListFoundationModels"
+       ],
+       "Effect": "Allow",
+       "Resource": "*",
+       "Sid": "DevBedrock"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "EcoBiteServiceUserDefaultPolicyA307CF86",
+    "Users": [
+     {
+      "Ref": "EcoBiteServiceUser62F24BDA"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/EcoBiteServiceUser/DefaultPolicy/Resource"
+   }
+  },
+  "ServiceUserAccessKey": {
+   "Type": "AWS::IAM::AccessKey",
+   "Properties": {
+    "Serial": 1,
+    "UserName": {
+     "Ref": "EcoBiteServiceUser62F24BDA"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/ServiceUserAccessKey"
+   }
+  },
+  "ServiceUserSecretE88F7773": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "Description": "AWS access key for local development (ECS uses task role instead)",
+    "Name": "EcoBiteServiceUserKey",
+    "SecretString": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"AWS_ACCESS_KEY_ID\": \"",
+       {
+        "Ref": "ServiceUserAccessKey"
+       },
+       "\", \"AWS_SECRET_ACCESS_KEY\": \"",
+       {
+        "Fn::GetAtt": [
+         "ServiceUserAccessKey",
+         "SecretAccessKey"
+        ]
+       },
+       "\", \"AWS_REGION\": \"us-east-1\", \"S3_BUCKET_NAME\": \"",
+       {
+        "Ref": "ProfilePhotosBucket46E0BA90"
+       },
+       "\", \"CLOUDFRONT_DOMAIN\": \"https://",
+       {
+        "Fn::GetAtt": [
+         "ProfilePhotosDistribution3BCBCDF2",
+         "DomainName"
+        ]
+       },
+       "\"}"
+      ]
+     ]
+    }
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/ServiceUserSecret/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31STW/bMAz9Lb2r2pYcek7TrghWrEac9VowCuNwUSRDpBIEhv/7IMuJ3Q/sxPceSYl80kRP7ib6+w2c+NZs9reW1ropBcxewYnfGp7q5j6aPYqab12Pcii8JXMe5MxbZayPm23wTnRTTl8CVeRmxiDz3DsJ3qaWL2UwOxxOHdMHYgm0jkLepdyYtwpN0M0Sa88kPnTNA0vpiW5ea5P012Kuiri2ZMq4dnmrAS19FFzB2uKgD9qM2RuCywxdIoHHRZHCb5AnEDzBWRWBjiA4HLxwgsHhtSBP0rOZCJjdAZ2oEk0MJOen4GPdzfBf4bEKyPxJXrhOT5uzbuY2smDoLO3hTwgVpK14/4BbcnTZ6aPinQA5DCOt7y0xHMlkn3pYGrDJp3TI3EcnrWI0AYUP4KDCoJuy4/3AAaVVBAfdLH12vIvDD+jRH87TX2L+Nb/w3CrrK9bNs6+u/lxwt/xbDZKMZz2ra0ume7tnD5t7sOAMbj4sgxZYyFgPm3VXQa46TnTzdXfI9434uI5Y0PU1FzzKryBUKNexR7RVMJRBFM8GLLlKN4PBqbhz8b2SwyqA2ZOrytw3+PlOaFu1RPYx5Ed8iVJHaVVxlp1336b6x1Tf3fxlotsQndAB9TLHf2h86w8zBAAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "EcoBiteStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "EcoBiteServiceLoadBalancerDNS995917BA": {
+   "Value": {
+    "Fn::GetAtt": [
+     "EcoBiteServiceLBDBCB4080",
+     "DNSName"
+    ]
+   }
+  },
+  "EcoBiteServiceServiceURL336DCC88": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "EcoBiteServiceLBDBCB4080",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "BackendApiUrl": {
+   "Description": "Stable public URL — paste as VITE_API_URL in the frontend",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "EcoBiteServiceLBDBCB4080",
+        "DNSName"
+       ]
+      },
+      "/api/v1"
+     ]
+    ]
+   }
+  },
+  "EcrRepositoryUri": {
+   "Description": "ECR URI — used by scripts/push_image.ps1 to push the Docker image",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      {
+       "Fn::Select": [
+        4,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "EcoBiteRepo14900D0E",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".dkr.ecr.",
+      {
+       "Fn::Select": [
+        3,
+        {
+         "Fn::Split": [
+          ":",
+          {
+           "Fn::GetAtt": [
+            "EcoBiteRepo14900D0E",
+            "Arn"
+           ]
+          }
+         ]
+        }
+       ]
+      },
+      ".",
+      {
+       "Ref": "AWS::URLSuffix"
+      },
+      "/",
+      {
+       "Ref": "EcoBiteRepo14900D0E"
+      }
+     ]
+    ]
+   }
+  },
+  "BucketName": {
+   "Description": "S3 bucket for EcoBite profile photos",
+   "Value": {
+    "Ref": "ProfilePhotosBucket46E0BA90"
+   }
+  },
+  "CloudFrontDomain": {
+   "Description": "Set this as CLOUDFRONT_DOMAIN in your backend .env",
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "https://",
+      {
+       "Fn::GetAtt": [
+        "ProfilePhotosDistribution3BCBCDF2",
+        "DomainName"
+       ]
+      }
+     ]
+    ]
+   }
+  },
+  "CloudFrontDistributionId": {
+   "Description": "CloudFront distribution ID",
+   "Value": {
+    "Ref": "ProfilePhotosDistribution3BCBCDF2"
+   }
+  },
+  "AppSecretArn": {
+   "Description": "Update backend config: aws secretsmanager update-secret --secret-id EcoBiteAppConfig --secret-string file://backend/.env.json",
+   "Value": {
+    "Ref": "EcoBiteAppSecret90D6AB57"
+   }
+  },
+  "ServiceUserSecretArn": {
+   "Description": "Local dev credentials: aws secretsmanager get-secret-value --secret-id EcoBiteServiceUserKey --query SecretString --output text",
+   "Value": {
+    "Ref": "ServiceUserSecretE88F7773"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

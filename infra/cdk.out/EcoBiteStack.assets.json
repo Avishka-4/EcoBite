@@ -1,0 +1,21 @@
+{
+  "version": "54.0.0",
+  "files": {
+    "53d02e8f24b57448115a35b112967765a5a7de6a4ec9fa38e45eadb889e96912": {
+      "displayName": "EcoBiteStack Template",
+      "source": {
+        "path": "EcoBiteStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "601930231989-us-east-1-8b81f7a6": {
+          "bucketName": "cdk-hnb659fds-assets-601930231989-us-east-1",
+          "objectKey": "53d02e8f24b57448115a35b112967765a5a7de6a4ec9fa38e45eadb889e96912.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::601930231989:role/cdk-hnb659fds-file-publishing-role-601930231989-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

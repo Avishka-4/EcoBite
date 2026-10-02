@@ -1,0 +1,889 @@
+{
+  "/EcoBiteStack": [
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    },
+    {
+      "type": "aws:cdk:acknowledged-rules",
+      "data": {
+        "CloudFormation-Validate::W3010": "Literal AZs in template are the result of accessing stack.availabilityZones, this is expected and safe"
+      },
+      "trace": [
+        "    ...aws-cdk-lib, jsii runtime...",
+        "    (no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ProfilePhotosDistribution": [
+    {
+      "type": "aws:cdk:warning",
+      "data": "Ignoring 'minimumProtocolVersion': it has no effect without a custom 'certificate'. The distribution uses the CloudFront default certificate, whose security policy is fixed at TLSv1. [ack: @aws-cdk/aws-cloudfront:minimumProtocolVersionWithoutCertificate]",
+      "trace": [
+        "Annotations.addMessage (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:3506)",
+        "Annotations.addWarningV2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:2194)",
+        "new Distribution2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-cloudfront\\lib\\distribution.js:1:14567)",
+        "new Distribution2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\no-box-stack-traces.js:1:349)",
+        "new Distribution2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:861)",
+        "Kernel._Kernel_create (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:62509)",
+        "Kernel.create (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:53243)",
+        "KernelHost.processRequest (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:227972)",
+        "KernelHost.run (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:226956)",
+        "Immediate._onImmediate (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:227000)",
+        "process.processImmediate (node:internal/timers:485:21)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ServiceUserAccessKey": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ServiceUserAccessKey"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/BackendApiUrl": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BackendApiUrl"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcrRepositoryUri": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcrRepositoryUri"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/BucketName": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BucketName"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/CloudFrontDomain": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CloudFrontDomain"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/CloudFrontDistributionId": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CloudFrontDistributionId"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/AppSecretArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "AppSecretArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ServiceUserSecretArn": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ServiceUserSecretArn"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/BootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "BootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/CheckBootstrapVersion": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CheckBootstrapVersion"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ProfilePhotosBucket/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ProfilePhotosBucket46E0BA90"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/OAC/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "OAC5B452445"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ProfilePhotosCachePolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ProfilePhotosCachePolicyC85B65C9"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ProfilePhotosDistribution/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ProfilePhotosDistribution3BCBCDF2"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteRepo/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteRepo14900D0E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpc076C00E1"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/IGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcIGW7EC4C47C"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/VPCGW": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcVPCGWC1D2EF6E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteCluster/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteClusterD14C5BD9"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteAppSecret/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteAppSecret90D6AB57"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteTaskRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteTaskRole91B546EB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteExecRole/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteExecRole50887229"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteLogGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteLogGroupCB9F48EE"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteTaskDef/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteTaskDef14671880"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/LoadBalancerDNS": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceLoadBalancerDNS995917BA"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/ServiceURL": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceServiceURL336DCC88"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/Service": [
+    {
+      "type": "aws:cdk:warning",
+      "data": "Enable the 'circuitBreaker' property to trigger a quicker deployment failure if tasks are failing to start up (without this setting deployments may take up to 3 hours to fail). [ack: @aws-cdk/aws-ecs:shouldUseCircuitBreaker]",
+      "trace": [
+        "Annotations.addMessage (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:3506)",
+        "Annotations.addWarningV2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:2194)",
+        "new BaseService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\base\\base-service.js:1:14814)",
+        "new BaseService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\no-box-stack-traces.js:1:349)",
+        "new FargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\fargate\\fargate-service.js:1:8083)",
+        "new FargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:861)",
+        "new ApplicationLoadBalancedFargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ecs-patterns\\lib\\fargate\\application-load-balanced-fargate-service.js:1:7416)",
+        "new ApplicationLoadBalancedFargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:861)",
+        "Kernel._Kernel_create (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:62509)",
+        "Kernel.create (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:53243)",
+        "KernelHost.processRequest (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:227972)",
+        "KernelHost.run (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:226956)",
+        "Immediate._onImmediate (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:227000)",
+        "process.processImmediate (node:internal/timers:485:21)"
+      ]
+    },
+    {
+      "type": "aws:cdk:warning",
+      "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+      "trace": [
+        "Annotations.addMessage (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:3506)",
+        "Annotations.addWarningV2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\annotations.js:1:2194)",
+        "new BaseService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\base\\base-service.js:1:16436)",
+        "new BaseService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\no-box-stack-traces.js:1:349)",
+        "new FargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ecs\\lib\\fargate\\fargate-service.js:1:8083)",
+        "new FargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:861)",
+        "new ApplicationLoadBalancedFargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ecs-patterns\\lib\\fargate\\application-load-balanced-fargate-service.js:1:7416)",
+        "new ApplicationLoadBalancedFargateService2 (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\core\\lib\\prop-injectable.js:1:861)",
+        "Kernel._Kernel_create (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:62509)",
+        "Kernel.create (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:53243)",
+        "KernelHost.processRequest (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:227972)",
+        "KernelHost.run (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:226956)",
+        "Immediate._onImmediate (C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\tmp5ai7f4i5\\lib\\program.js:1:227000)",
+        "process.processImmediate (node:internal/timers:485:21)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteServiceUser/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceUser62F24BDA"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ServiceUserSecret/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ServiceUserSecretE88F7773"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime, node internals...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/CDKMetadata/Default": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "CDKMetadata"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/ProfilePhotosBucket/Policy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "ProfilePhotosBucketPolicyE61C6CCF"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet1SubnetA00AC013"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet1RouteTableD7AD0AC6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet1RouteTableAssociationA15AD189"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet1DefaultRoute9182D588"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:225 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib, jsii runtime..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet1/EIP": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet1EIP75A6719E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet1/NATGateway": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet1NATGatewayF29A4C10"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet2Subnet04ED2646"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet2RouteTableFF19E5B8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet2RouteTableAssociation952C162F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:287 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PublicSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPublicSubnet2DefaultRouteFC83D505"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:225 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib, jsii runtime..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet1/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet1SubnetD58EDFA3"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet1/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet1RouteTable98F6E277"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet1/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet1RouteTableAssociationF1E4C185"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet1/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet1DefaultRoute010AB34E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet2/Subnet": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet2Subnet6A0254C4"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet2/RouteTable": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet2RouteTable1FB77B88"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet2/RouteTableAssociation": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet2RouteTableAssociation940EADB8"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...C:\\Users\\CNNCOM~1\\AppData\\Local\\Temp\\jsii-kernel-vpIyrO\\node_modules\\aws-cdk-lib\\aws-ec2\\lib\\vpc.js:1:289 in aws-cdk-lib...",
+        "Array.forEach (:)",
+        "...aws-cdk-lib..."
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteVpc/PrivateSubnet2/DefaultRoute": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteVpcPrivateSubnet2DefaultRoute709DD419"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteTaskRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteTaskRoleDefaultPolicy67CA0AF6"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteExecRole/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteExecRoleDefaultPolicy73D0DC99"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/LB/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceLBDBCB4080"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/Service/Service": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceC9C4AE30"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteServiceUser/DefaultPolicy/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceUserDefaultPolicyA307CF86"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/LB/SecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceLBSecurityGroupE2F8870A"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/LB/SecurityGroup/to EcoBiteStackEcoBiteServiceSecurityGroup694587FC:8000": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceLBSecurityGrouptoEcoBiteStackEcoBiteServiceSecurityGroup694587FC800025DE544D"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/LB/PublicListener/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceLBPublicListener84EAED1F"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/Service/SecurityGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceSecurityGroup6C25A568"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/Service/SecurityGroup/from EcoBiteStackEcoBiteServiceLBSecurityGroup259006A2:8000": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceSecurityGroupfromEcoBiteStackEcoBiteServiceLBSecurityGroup259006A28000ABA8EE4E"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/LB/PublicListener/ECSGroup/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceLBPublicListenerECSGroup62417B46"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/Service/TaskCount/Target/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceTaskCountTarget1C9CCD96"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ],
+  "/EcoBiteStack/EcoBiteService/Service/TaskCount/Target/CpuScaling/Resource": [
+    {
+      "type": "aws:cdk:logicalId",
+      "data": "EcoBiteServiceTaskCountTargetCpuScalingF113EFCB"
+    },
+    {
+      "type": "aws:cdk:creationStack",
+      "data": [
+        "...aws-cdk-lib, jsii runtime...",
+        "(no user code in 10 frames, use --stack-trace-limit to capture more)"
+      ]
+    }
+  ]
+}

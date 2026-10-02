@@ -1,10 +1,19 @@
 import axios from 'axios';
-import { apiClient, getBaseUrl, CANDIDATE_HOSTS } from './client';
+import { getBaseUrl } from './client';
 
 export interface DetectResponse {
   ingredients: string[];
   confidence: number;
   model_available: boolean;
+}
+
+// Build request headers with optional auth token
+function getHeaders(extra: Record<string, string> = {}) {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('ecobite_token') : null;
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...extra,
+  };
 }
 
 export const ingredientsApi = {
@@ -13,45 +22,40 @@ export const ingredientsApi = {
     const formData = new FormData();
     formData.append('file', file);
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('ecobite_token') : null;
-    const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
-
     // 1. Try current configured baseURL first
     const primaryUrl = `${getBaseUrl()}/ingredients/voice-detect`;
     try {
       const response = await axios.post<DetectResponse>(primaryUrl, formData, {
-        headers: { 'Content-Type': 'multipart/form-data', ...authHeader },
-        timeout: 10000,
+        headers: getHeaders({ 'Content-Type': 'multipart/form-data' }),
+        timeout: 30000,
       });
       return response.data;
     } catch (primaryErr) {
       console.warn(`Primary URL ${primaryUrl} failed, trying candidate fallback hosts...`, primaryErr);
     }
 
-    // 2. Try candidate fallback hosts
-    for (const host of CANDIDATE_HOSTS) {
-      const testUrl = `${host}/ingredients/voice-detect`;
-      if (testUrl === primaryUrl) continue;
+    // No fallback hosts – if primary fails, propagate the error
+    throw new Error(`Could not connect to backend server at ${primaryUrl}`);
+  },
 
-      try {
-        const formDataCopy = new FormData();
-        formDataCopy.append('file', file);
-        const response = await axios.post<DetectResponse>(testUrl, formDataCopy, {
-          headers: { 'Content-Type': 'multipart/form-data', ...authHeader },
-          timeout: 4000,
-        });
+  /** Detect food ingredients from an image using AWS Rekognition */
+  detectImage: async (imageFile: File): Promise<DetectResponse> => {
+    const formData = new FormData();
+    formData.append('file', imageFile);
 
-        // Remember the working host for all future requests!
-        if (typeof window !== 'undefined') {
-          const cleanHost = host.replace(/\/api\/v1$/, '');
-          localStorage.setItem('ecobite_backend_ip', cleanHost);
-        }
-        return response.data;
-      } catch {
-        // try next
-      }
+    // 1. Try current configured baseURL first
+    const primaryUrl = `${getBaseUrl()}/ingredients/image-detect`;
+    try {
+      const response = await axios.post<DetectResponse>(primaryUrl, formData, {
+        headers: getHeaders({ 'Content-Type': 'multipart/form-data' }),
+        timeout: 30000,
+      });
+      return response.data;
+    } catch (primaryErr) {
+      console.warn(`Primary URL ${primaryUrl} failed, trying candidate fallback hosts...`, primaryErr);
     }
 
-    throw new Error(`Could not connect to backend server at ${getBaseUrl()}`);
+    // No fallback hosts – if primary fails, propagate the error
+    throw new Error(`Could not connect to backend server at ${primaryUrl}`);
   },
 };

@@ -1,43 +1,44 @@
 import axios from 'axios';
 
-// Known backend candidate addresses for Android Emulator, Physical LAN, and Localhost
-export const CANDIDATE_HOSTS = [
-  'http://10.0.2.2:8000/api/v1',
-  'http://172.24.63.121:8000/api/v1',
-  'http://192.168.56.1:8000/api/v1',
-  'http://127.0.0.1:8000/api/v1',
-  'http://localhost:8000/api/v1',
-];
+/**
+ * API client for EcoBite backend.
+ *
+ * Production (ECS Fargate):
+ *   Set VITE_API_URL to the ALB URL from CDK output "BackendApiUrl"
+ *   e.g. http://<alb-dns>.us-east-1.elb.amazonaws.com/api/v1
+ *
+ * Local dev:
+ *   Set VITE_API_URL=http://localhost:8000/api/v1 in a .env.local file,
+ *   or leave unset to use the localhost fallback below.
+ */
+
+// Default local dev address — override with VITE_API_URL for ECS / any remote host
+const LOCAL_BACKEND = 'http://localhost:8000/api/v1';
+
+// NOTE: Fallback hosts removed – the app now uses only the public BackendApiUrl.
+// If you need a local dev backend, set VITE_API_URL in .env.local.
+export const CANDIDATE_HOSTS = [];
 
 export function getBaseUrl(): string {
+  // VITE_API_URL is set at build time or via .env.local
+  // In ECS production it must point to the ALB BackendApiUrl CDK output
   if (import.meta.env.VITE_API_URL) {
     return import.meta.env.VITE_API_URL as string;
   }
-  if (typeof window !== 'undefined') {
-    const customIp = localStorage.getItem('ecobite_backend_ip');
-    if (customIp) {
-      const cleanIp = customIp.trim().replace(/^https?:\/\//, '').replace(/[\.\/]+$/, '');
-      const hasPort = cleanIp.includes(':');
-      return `http://${hasPort ? cleanIp : cleanIp + ':8000'}/api/v1`;
-    }
-
-    const isAndroid = /android/i.test(navigator.userAgent) || window.location.protocol === 'capacitor:';
-    if (isAndroid) {
-      return 'http://10.0.2.2:8000/api/v1';
-    }
-  }
-  return 'http://localhost:8000/api/v1';
+  return LOCAL_BACKEND;
 }
 
 export const apiClient = axios.create({
   baseURL: getBaseUrl(),
-  headers: { 'Content-Type': 'application/json' },
-  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 30000,
 });
 
 apiClient.interceptors.request.use((config) => {
   config.baseURL = getBaseUrl();
-  const token = localStorage.getItem('ecobite_token');
+  const token = typeof window !== 'undefined' ? localStorage.getItem('ecobite_token') : null;
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

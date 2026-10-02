@@ -13,6 +13,9 @@ import {
   Info,
   Volume2,
   CheckCircle2,
+  Camera,
+  ImageIcon,
+  Upload,
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '../../context/AuthContext';
@@ -24,7 +27,7 @@ interface FoodInputProps {
   onGenerateRecipes: (ingredients: string[]) => void;
 }
 
-type InputMode = 'choice' | 'voice' | 'manual' | 'detected';
+type InputMode = 'choice' | 'voice' | 'manual' | 'detected' | 'photo';
 
 // Common typo corrections dictionary
 const COMMON_TYPOS: Record<string, string> = {
@@ -110,6 +113,11 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
   const [inputValue, setInputValue] = useState('');
   const [modelWarning, setModelWarning] = useState(false);
 
+  // Photo State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
   // ── Stop Voice Recording helper ───────────────────────────────────────────
   const stopVoiceStream = useCallback(() => {
     if (timerRef.current) {
@@ -149,12 +157,12 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
     }
   }, []);
 
-  // ── Finish Voice Recording & Detect with Vosk ──────────────────────────────
+  // ── Finish Voice Recording & Detect with AWS Transcribe ────────────────────
   const handleStopAndDetectVoice = async () => {
     if (!voiceSessionRef.current || !isRecording) return;
 
     setDetecting(true);
-    setDetectingMessage('Processing speech with Vosk vocabulary…');
+    setDetectingMessage('Processing speech with AWS Transcribe…');
     setModelWarning(false);
     setApiError(null);
 
@@ -181,7 +189,7 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
       }
       setInputMode('detected');
     } catch (err: unknown) {
-      console.error('Vosk speech recognition error:', err);
+      console.error('AWS Transcribe speech recognition error:', err);
       const errorObj = err as { message?: string; response?: { data?: { detail?: string } } };
       const detail = errorObj.response?.data?.detail || errorObj.message || 'Network connection failed';
       setApiError(`Could not reach backend at ${getBaseUrl()}. ${detail}`);
@@ -205,6 +213,52 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
       stopVoiceStream();
     };
   }, [inputMode, startVoiceRecording, stopVoiceStream]);
+
+  // ── Handle Photo File Selection ────────────────────────────────────────────
+  const handlePhotoSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPhotoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ── Detect Ingredients from Photo (AWS Rekognition) ────────────────────────
+  const handleDetectFromPhoto = async () => {
+    if (!selectedFile) return;
+
+    setDetecting(true);
+    setDetectingMessage('Scanning image with AWS Rekognition AI…');
+    setModelWarning(false);
+    setApiError(null);
+
+    try {
+      const result = await ingredientsApi.detectImage(selectedFile);
+      const normalized = result.ingredients.map(cleanAndNormalizeIngredient).filter(Boolean);
+      const unique = Array.from(new Set(normalized));
+
+      setIngredients(unique);
+      if (unique.length === 0) {
+        setModelWarning(true);
+      }
+      setInputMode('detected');
+    } catch (err: unknown) {
+      console.error('Image detection error:', err);
+      const errorObj = err as { message?: string; response?: { data?: { detail?: string } } };
+      const detail = errorObj.response?.data?.detail || errorObj.message || 'Network connection failed';
+      setApiError(`Could not reach backend at ${getBaseUrl()}. ${detail}`);
+      setModelWarning(true);
+      setInputMode('detected');
+    } finally {
+      setDetecting(false);
+      setPhotoPreview(null);
+      setSelectedFile(null);
+    }
+  };
 
   // ── Add manual ingredient (with auto-cleaning & typo correction) ───────────
   const handleAddIngredient = (nameOverride?: string) => {
@@ -255,7 +309,33 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
           </div>
 
           <div className="space-y-4 max-w-sm mx-auto w-full">
-            {/* Vosk Voice Input Option */}
+            {/* 📸 Photo Scan Option — AWS Rekognition */}
+            <button
+              onClick={() => {
+                setIngredients([]);
+                setPhotoPreview(null);
+                setSelectedFile(null);
+                setInputMode('photo');
+              }}
+              className="w-full bg-white/95 backdrop-blur-sm rounded-3xl shadow-lg p-5 active:scale-95 transition-all flex items-center gap-4 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-xl group text-left relative overflow-hidden"
+            >
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-bl-xl uppercase tracking-wider">
+                AWS AI
+              </div>
+              <div className="bg-gradient-to-br from-emerald-500 to-teal-500 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform text-white">
+                <Camera className="w-7 h-7" />
+              </div>
+              <div className="flex-1 pr-2">
+                <h3 className="font-bold text-gray-800 text-base mb-0.5">
+                  Scan Photo
+                </h3>
+                <p className="text-gray-500 text-xs">
+                  Take a photo or upload an image — AI detects your ingredients
+                </p>
+              </div>
+            </button>
+
+            {/* AWS Transcribe Voice Input Option */}
             <button
               onClick={() => {
                 setIngredients([]);
@@ -263,8 +343,8 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
               }}
               className="w-full bg-white/95 backdrop-blur-sm rounded-3xl shadow-lg p-5 active:scale-95 transition-all flex items-center gap-4 border-2 border-emerald-200 hover:border-emerald-400 hover:shadow-xl group text-left relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-bl-xl uppercase tracking-wider">
-                Vosk Voice AI
+              <div className="absolute top-0 right-0 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-bold px-3 py-0.5 rounded-bl-xl uppercase tracking-wider">
+                AWS AI
               </div>
               <div className="bg-gradient-to-br from-emerald-500 to-teal-500 w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-md group-hover:scale-105 transition-transform text-white">
                 <Mic className="w-7 h-7" />
@@ -274,7 +354,7 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
                   Speak Ingredients
                 </h3>
                 <p className="text-gray-500 text-xs">
-                  Constrained vocabulary speech recognition with editable review
+                  AWS Transcribe speech recognition with editable review
                 </p>
               </div>
             </button>
@@ -301,7 +381,149 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
     );
   }
 
-  // ── 2. VOICE INPUT SCREEN (VOSK) ───────────────────────────────────────────
+  // ── 1.5. PHOTO SCAN SCREEN ─────────────────────────────────────────────────
+  if (inputMode === 'photo') {
+    return (
+      <div className="h-full bg-gradient-to-br from-emerald-50 via-teal-50 to-lime-50 flex flex-col relative overflow-hidden">
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoSelected}
+        />
+
+        {/* Top bar */}
+        <div className="px-6 pt-6 pb-2 flex items-center justify-between z-10">
+          <button
+            onClick={() => {
+              setPhotoPreview(null);
+              setSelectedFile(null);
+              setInputMode('choice');
+            }}
+            className="w-9 h-9 bg-white rounded-full flex items-center justify-center shadow-md active:scale-95"
+          >
+            <ArrowLeft className="w-4 h-4 text-gray-700" />
+          </button>
+          <div className="text-center">
+            <h1 className="text-lg font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+              Scan Ingredients
+            </h1>
+            <p className="text-gray-500 text-xs">AWS Rekognition AI</p>
+          </div>
+          <div className="w-9" />
+        </div>
+
+        {/* Photo content */}
+        <div className="flex-1 px-6 flex flex-col items-center justify-center text-center">
+          {detecting ? (
+            <div className="bg-white/90 backdrop-blur-md p-8 rounded-3xl border border-violet-100 shadow-xl max-w-xs w-full flex flex-col items-center">
+              <div className="w-16 h-16 border-4 border-violet-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <h3 className="font-bold text-gray-800 text-base mb-1">Detecting Ingredients</h3>
+              <p className="text-gray-500 text-xs">{detectingMessage}</p>
+            </div>
+          ) : photoPreview ? (
+            /* Photo preview with detect button */
+            <div className="flex flex-col items-center max-w-sm w-full">
+              <div className="relative mb-4 w-full">
+                <img
+                  src={photoPreview}
+                  alt="Food preview"
+                  className="w-full max-h-64 object-cover rounded-3xl shadow-xl border-4 border-white"
+                />
+                <button
+                  onClick={() => {
+                    setPhotoPreview(null);
+                    setSelectedFile(null);
+                  }}
+                  className="absolute top-3 right-3 w-8 h-8 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white active:scale-95"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
+                  Ready to scan
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-3 w-full">
+                <button
+                  onClick={handleDetectFromPhoto}
+                  className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white py-4 rounded-2xl font-bold text-sm active:scale-95 shadow-xl flex items-center justify-center gap-2 transition-all"
+                >
+                  <Sparkles className="w-4 h-4" /> Detect Ingredients with AI
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-gray-500 hover:text-gray-700 text-xs font-semibold py-1"
+                >
+                  Choose a Different Photo
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* Upload prompt */
+            <div className="flex flex-col items-center max-w-sm w-full">
+              <div className="relative mb-6">
+                <div className="absolute -inset-4 bg-violet-400 rounded-full blur-xl opacity-30 animate-pulse" />
+                <div className="w-28 h-28 rounded-full bg-gradient-to-tr from-violet-500 to-purple-500 flex items-center justify-center shadow-2xl relative">
+                  <Camera className="w-12 h-12 text-white" />
+                </div>
+              </div>
+
+              <h2 className="text-lg font-bold text-gray-800 mb-1">
+                Upload or Take a Photo
+              </h2>
+              <p className="text-gray-500 text-xs max-w-xs mb-6 leading-relaxed">
+                Snap a picture of your fridge, pantry, or ingredients laid out — our AI will identify them
+              </p>
+
+              {/* Guide card */}
+              <div className="bg-violet-100/60 backdrop-blur-sm rounded-2xl p-3.5 mb-6 text-left border border-violet-200 w-full flex items-start gap-2.5">
+                <ImageIcon className="w-4 h-4 text-violet-700 flex-shrink-0 mt-0.5" />
+                <p className="text-xs text-violet-900 leading-snug">
+                  AWS Rekognition AI analyzes your photo and identifies food items. You can edit the detected list before generating recipes!
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3 w-full">
+                <button
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.removeAttribute('capture');
+                      fileInputRef.current.click();
+                    }
+                  }}
+                  className="w-full bg-gradient-to-r from-violet-500 to-purple-500 text-white py-4 rounded-2xl font-bold text-sm active:scale-95 shadow-xl flex items-center justify-center gap-2 transition-all"
+                >
+                  <Upload className="w-4 h-4" /> Upload from Gallery
+                </button>
+                <button
+                  onClick={() => {
+                    if (fileInputRef.current) {
+                      fileInputRef.current.setAttribute('capture', 'environment');
+                      fileInputRef.current.click();
+                    }
+                  }}
+                  className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white py-4 rounded-2xl font-bold text-sm active:scale-95 shadow-xl flex items-center justify-center gap-2 transition-all"
+                >
+                  <Camera className="w-4 h-4" /> Take a Photo
+                </button>
+                <button
+                  onClick={() => setInputMode('manual')}
+                  className="text-gray-500 hover:text-gray-700 text-xs font-semibold py-1"
+                >
+                  Switch to Manual Typing
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // ── 2. VOICE INPUT SCREEN (AWS TRANSCRIBE) ─────────────────────────────────
   if (inputMode === 'voice') {
     if (voiceError) {
       return (
@@ -348,7 +570,7 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
             <h1 className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-lime-600 bg-clip-text text-transparent">
               Speak Ingredients
             </h1>
-            <p className="text-gray-500 text-xs">Vosk Constrained Vocabulary</p>
+            <p className="text-gray-500 text-xs">AWS Transcribe AI</p>
           </div>
           <div className="w-9" />
         </div>
@@ -402,7 +624,7 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
               <div className="bg-emerald-100/60 backdrop-blur-sm rounded-2xl p-3.5 mb-6 text-left border border-emerald-200 w-full flex items-start gap-2.5">
                 <Volume2 className="w-4 h-4 text-emerald-700 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-emerald-900 leading-snug">
-                  Vosk AI maps your speech directly to culinary ingredients. You can edit the list in the next step!
+                  AWS Transcribe AI converts your speech to text and identifies culinary ingredients. You can edit the list in the next step!
                 </p>
               </div>
 
@@ -472,8 +694,8 @@ export function FoodInput({ onGenerateRecipes }: FoodInputProps) {
               <p className="text-[11px] font-semibold text-gray-600 mb-1.5">Tap to switch backend host:</p>
               <div className="flex flex-wrap gap-1.5">
                 {[
+                  { label: 'Wi-Fi (192.168.8.100)', host: '192.168.8.100:8000' },
                   { label: 'Emulator (10.0.2.2)', host: '10.0.2.2:8000' },
-                  { label: 'Wi-Fi IP (172.24.63.121)', host: '172.24.63.121:8000' },
                   { label: 'Localhost (8000)', host: 'localhost:8000' },
                 ].map((item) => (
                   <button
