@@ -22,6 +22,57 @@ const CUISINES = [
   { name: 'English', emoji: '🇬🇧' },
 ];
 
+const MOCK_RECIPES: Recipe[] = [
+  {
+    id: 'mock-tomato-pasta',
+    name: 'Tomato Garlic Pasta',
+    description: 'A quick, comforting pasta made with everyday ingredients.',
+    cookTime: '25 min',
+    servings: 2,
+    difficulty: 'Easy',
+    ingredients: ['pasta', 'tomatoes', 'garlic', 'olive oil', 'salt'],
+    missingIngredients: [],
+    instructions: [
+      'Cook the pasta in salted water until al dente.',
+      'Saute garlic in olive oil, then add chopped tomatoes.',
+      'Toss the pasta with the sauce and season to taste.',
+    ],
+    imageUrl: 'https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=800',
+  },
+  {
+    id: 'mock-vegetable-rice',
+    name: 'Garden Vegetable Rice',
+    description: 'A flexible one-pan rice bowl for using leftover vegetables.',
+    cookTime: '30 min',
+    servings: 2,
+    difficulty: 'Easy',
+    ingredients: ['rice', 'onions', 'carrots', 'peas', 'soy sauce'],
+    missingIngredients: ['rice'],
+    instructions: [
+      'Cook the rice and set it aside to cool slightly.',
+      'Stir-fry the vegetables until tender and fragrant.',
+      'Add the rice and soy sauce, then toss until hot.',
+    ],
+    imageUrl: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800',
+  },
+  {
+    id: 'mock-masala-eggs',
+    name: 'Masala Scrambled Eggs',
+    description: 'Warm scrambled eggs with tomatoes, onion, and gentle spice.',
+    cookTime: '15 min',
+    servings: 2,
+    difficulty: 'Easy',
+    ingredients: ['eggs', 'tomatoes', 'onions', 'turmeric', 'salt'],
+    missingIngredients: ['eggs'],
+    instructions: [
+      'Saute onions and tomatoes until soft.',
+      'Add turmeric and beaten eggs to the pan.',
+      'Stir gently until the eggs are cooked through.',
+    ],
+    imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800',
+  },
+];
+
 
 export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProps) {
   const { user } = useAuth();
@@ -30,12 +81,14 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [usingMockRecipes, setUsingMockRecipes] = useState(false);
   const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const loadRecipes = useCallback(async (cuisineToUse?: string) => {
     setLoading(true);
     setError('');
+    setUsingMockRecipes(false);
     const targetCuisine = cuisineToUse || selectedCuisine;
     try {
       const data = await recipesApi.generate({
@@ -47,12 +100,16 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
       if (data && data.length > 0) {
         setRecipes(data);
       } else {
-        setError('No recipes returned. Please try again.');
+        setRecipes(MOCK_RECIPES);
+        setUsingMockRecipes(true);
+        setError('No recipes were returned from the recipe service.');
       }
     } catch (err: unknown) {
       console.error('Recipe generation error:', err);
       const message = err instanceof Error ? err.message : 'Failed to generate recipes.';
       setError(message);
+      setRecipes(MOCK_RECIPES);
+      setUsingMockRecipes(true);
     } finally {
       setLoading(false);
     }
@@ -156,7 +213,7 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
   }
 
   // ── Error ───────────────────────────────────────────────────────────────────
-  if (error) {
+  if (error && !usingMockRecipes) {
     return (
       <div className="h-full flex items-center justify-center px-6">
         <div className="text-center">
@@ -288,6 +345,13 @@ export function RecipeSuggestions({ ingredients, onBack }: RecipeSuggestionsProp
             <RefreshCw className="w-4 h-4" />
           </button>
         </div>
+
+        {usingMockRecipes && (
+          <div className="mb-3 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-center shadow-sm">
+            <p className="text-xs font-semibold text-amber-900">Couldn't connect to the recipe service.</p>
+            <p className="mt-1 text-[11px] text-amber-800">These are mock recipes for demonstration.</p>
+          </div>
+        )}
 
         {/* 8 Cuisines Tabs Bar */}
         <div className="flex gap-1.5 overflow-x-auto pb-2 scrollbar-none -mx-2 px-2">
