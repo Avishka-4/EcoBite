@@ -16,6 +16,7 @@ build/
 .env.local
 .env.*.local
 backend/.env
+*.env.json
 
 # ── Python ────────────────────────────────────────────────────────────────────
 __pycache__/
